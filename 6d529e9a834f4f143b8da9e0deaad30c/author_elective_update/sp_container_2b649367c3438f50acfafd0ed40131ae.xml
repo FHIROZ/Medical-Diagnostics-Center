@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_container">
+    <sp_container action="DELETE">
+        <aria_label/>
+        <background_color/>
+        <background_image/>
+        <background_style>default</background_style>
+        <bootstrap_alt>false</bootstrap_alt>
+        <class_name/>
+        <container_class_name/>
+        <name>Patient Dashboard - Container 2</name>
+        <order>2</order>
+        <semantic_tag/>
+        <sp_page display_value="patient_dashboard">dc911be3c3438f50acfafd0ed4013109</sp_page>
+        <subheader>false</subheader>
+        <sys_class_name>sp_container</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-07 04:47:31</sys_created_on>
+        <sys_id>2b649367c3438f50acfafd0ed40131ae</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Patient Dashboard - Container 2</sys_name>
+        <sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Medical Diagnosis Center">6d529e9a834f4f143b8da9e0deaad30c</sys_scope>
+        <sys_update_name>sp_container_2b649367c3438f50acfafd0ed40131ae</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-07 04:47:59</sys_updated_on>
+        <title/>
+        <width>container</width>
+    </sp_container>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Medical Diagnosis Center">6d529e9a834f4f143b8da9e0deaad30c</application>
+        <file_path/>
+        <instance_id>e8ca34c5ebac0f54e9bbfddacad0cd94</instance_id>
+        <instance_name>dev392908</instance_name>
+        <name>sp_container_2b649367c3438f50acfafd0ed40131ae</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_container"><sp_container action="INSERT_OR_UPDATE"><aria_label/><background_color/><background_image/><background_style>default</background_style><bootstrap_alt>false</bootstrap_alt><class_name/><container_class_name/><name>Patient Dashboard - Container 2</name><order>2</order><semantic_tag/><sp_page display_value="patient_dashboard">dc911be3c3438f50acfafd0ed4013109</sp_page><subheader>false</subheader><sys_class_name>sp_container</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2026-09-07 04:47:31</sys_created_on><sys_id>2b649367c3438f50acfafd0ed40131ae</sys_id><sys_mod_count>1</sys_mod_count><sys_name>Patient Dashboard - Container 2</sys_name><sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package><sys_policy/><sys_scope display_value="Medical Diagnosis Center">6d529e9a834f4f143b8da9e0deaad30c</sys_scope><sys_update_name>sp_container_2b649367c3438f50acfafd0ed40131ae</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2026-09-07 04:47:59</sys_updated_on><title/><width>container</width></sp_container></record_update>]]></payload>
+        <payload_hash>447677420</payload_hash>
+        <record_name>Patient Dashboard - Container 2</record_name>
+        <reverted_from/>
+        <source>b9dbc367c3cb4f50acfafd0ed40131ea</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-07 04:47:59</sys_created_on>
+        <sys_id>d284176bc3438f50acfafd0ed4013117</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>1a07a31cf5c0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-07 04:47:59</sys_updated_on>
+        <type>Container</type>
+        <update_guid>9284176b7a438f500e48b23a49605c16</update_guid>
+        <update_guid_history>9284176b7a438f500e48b23a49605c16:447677420,ef649367e0438f500ab79c62937c8db0:1075712749</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Patient Dashboard - Container 2">8ee453abc3438f50acfafd0ed40131c5</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-07 04:49:36</sys_created_on>
+        <sys_db_object display_value="" name="sp_container">sp_container</sys_db_object>
+        <sys_id>73422ac0d6674d388b4c92b7d58c9640</sys_id>
+        <sys_metadata>2b649367c3438f50acfafd0ed40131ae</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Patient Dashboard - Container 2</sys_name>
+        <sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Medical Diagnosis Center">6d529e9a834f4f143b8da9e0deaad30c</sys_scope>
+        <sys_scope_delete display_value="">31caa1ba3c34445ba3d31b655b027a89</sys_scope_delete>
+        <sys_update_name>sp_container_2b649367c3438f50acfafd0ed40131ae</sys_update_name>
+        <sys_update_version display_value="sp_container_2b649367c3438f50acfafd0ed40131ae">d284176bc3438f50acfafd0ed4013117</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-07 04:49:36</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

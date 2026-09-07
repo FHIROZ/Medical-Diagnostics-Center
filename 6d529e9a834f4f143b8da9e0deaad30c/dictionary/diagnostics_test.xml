@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element db_object_id="018a982cf54403100a22c0b3dfa15116" label="Diagnostics Test" max_length="40" name="diagnostics_test" type="collection">
+        <element label="Test Code" max_length="40" name="x_2056616_medica_0_test_code" type="string"/>
+        <element label="New Field 1" max_length="40" name="x_2056616_medica_0_new_field_1" type="string"/>
+        <element label="Description" max_length="40" name="x_2056616_medica_0_description" type="string"/>
+        <element attributes="edge_encryption_enabled=true,omit_sys_original=true" label="Price" max_length="20" name="x_2056616_medica_0_price" type="currency"/>
+        <element attributes="edge_encryption_enabled=true" label="Active" max_length="255" name="x_2056616_medica_0_active" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Category" max_length="255" name="x_2056616_medica_0_category" type="choice">
+            <choice/>
+        </element>
+        <element label="Test Duration" max_length="40" name="x_2056616_medica_0_test_duration" type="string"/>
+        <element label="Test Name" max_length="40" name="x_2056616_medica_0_test_name" type="string"/>
+    </element>
+</database>

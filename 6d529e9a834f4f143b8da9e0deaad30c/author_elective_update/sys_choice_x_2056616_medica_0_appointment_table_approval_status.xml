@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?><record_update>
-    <sys_choice action="INSERT_OR_UPDATE" field="payment_status" table="x_2056616_medica_0_appointment_table" version="3">
+    <sys_choice action="INSERT_OR_UPDATE" field="approval_status" table="x_2056616_medica_0_appointment_table" version="3">
         <sys_choice_set action="INSERT_OR_UPDATE">
-            <element>payment_status</element>
+            <element>approval_status</element>
             <name>x_2056616_medica_0_appointment_table</name>
             <sys_class_name>sys_choice_set</sys_class_name>
             <sys_created_by>admin</sys_created_by>
-            <sys_created_on>2026-09-03 10:05:47</sys_created_on>
-            <sys_id>f6e67396838b8f143b8da9e0deaad39c</sys_id>
+            <sys_created_on>2026-09-03 10:05:45</sys_created_on>
             <sys_mod_count>0</sys_mod_count>
-            <sys_name>payment_status</sys_name>
+            <sys_name>approval_status</sys_name>
             <sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package>
             <sys_policy/>
             <sys_scope display_value="Medical Diagnosis Center">6d529e9a834f4f143b8da9e0deaad30c</sys_scope>
-            <sys_update_name>sys_choice_x_2056616_medica_0_appointment_table_payment_status</sys_update_name>
+            <sys_update_name>sys_choice_x_2056616_medica_0_appointment_table_approval_status</sys_update_name>
             <sys_updated_by>admin</sys_updated_by>
-            <sys_updated_on>2026-09-03 10:05:47</sys_updated_on>
+            <sys_updated_on>2026-09-03 10:05:45</sys_updated_on>
         </sys_choice_set>
         <sys_choice action="INSERT_OR_UPDATE">
             <dependent_value/>
-            <element>payment_status</element>
+            <element>approval_status</element>
             <hint/>
             <inactive>false</inactive>
             <label>Pending</label>
@@ -27,74 +26,89 @@
             <sequence>0</sequence>
             <synonyms/>
             <sys_created_by>admin</sys_created_by>
-            <sys_created_on>2026-09-03 10:05:47</sys_created_on>
+            <sys_created_on>2026-09-03 10:05:45</sys_created_on>
             <sys_domain>global</sys_domain>
             <sys_domain_path>/</sys_domain_path>
-            <sys_id>fee67396838b8f143b8da9e0deaad39b</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_updated_by>admin</sys_updated_by>
-            <sys_updated_on>2026-09-03 10:05:47</sys_updated_on>
+            <sys_updated_on>2026-09-03 10:05:45</sys_updated_on>
             <value>pending</value>
         </sys_choice>
         <sys_choice action="INSERT_OR_UPDATE">
             <dependent_value/>
-            <element>payment_status</element>
+            <element>approval_status</element>
             <hint/>
             <inactive>false</inactive>
-            <label>Paid</label>
+            <label>Approved</label>
             <language>en</language>
             <name>x_2056616_medica_0_appointment_table</name>
             <sequence>1</sequence>
             <synonyms/>
             <sys_created_by>admin</sys_created_by>
-            <sys_created_on>2026-09-03 10:05:47</sys_created_on>
+            <sys_created_on>2026-09-03 10:05:46</sys_created_on>
             <sys_domain>global</sys_domain>
             <sys_domain_path>/</sys_domain_path>
-            <sys_id>fae67396838b8f143b8da9e0deaad39d</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_updated_by>admin</sys_updated_by>
-            <sys_updated_on>2026-09-03 10:05:47</sys_updated_on>
-            <value>paid</value>
+            <sys_updated_on>2026-09-03 10:05:46</sys_updated_on>
+            <value>approved</value>
         </sys_choice>
         <sys_choice action="INSERT_OR_UPDATE">
             <dependent_value/>
-            <element>payment_status</element>
+            <element>approval_status</element>
             <hint/>
             <inactive>false</inactive>
-            <label>Failed</label>
+            <label>Completed</label>
             <language>en</language>
             <name>x_2056616_medica_0_appointment_table</name>
             <sequence>2</sequence>
             <synonyms/>
             <sys_created_by>admin</sys_created_by>
-            <sys_created_on>2026-09-03 10:05:47</sys_created_on>
+            <sys_created_on>2026-09-03 10:05:46</sys_created_on>
             <sys_domain>global</sys_domain>
             <sys_domain_path>/</sys_domain_path>
-            <sys_id>72e67396838b8f143b8da9e0deaad39f</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_updated_by>admin</sys_updated_by>
-            <sys_updated_on>2026-09-03 10:05:47</sys_updated_on>
-            <value>failed</value>
+            <sys_updated_on>2026-09-03 10:05:46</sys_updated_on>
+            <value>completed</value>
         </sys_choice>
         <sys_choice action="INSERT_OR_UPDATE">
             <dependent_value/>
-            <element>payment_status</element>
+            <element>approval_status</element>
             <hint/>
             <inactive>false</inactive>
-            <label>Refunded</label>
+            <label>Cancelled</label>
             <language>en</language>
             <name>x_2056616_medica_0_appointment_table</name>
             <sequence>3</sequence>
             <synonyms/>
             <sys_created_by>admin</sys_created_by>
-            <sys_created_on>2026-09-03 10:05:47</sys_created_on>
+            <sys_created_on>2026-09-03 10:05:46</sys_created_on>
             <sys_domain>global</sys_domain>
             <sys_domain_path>/</sys_domain_path>
-            <sys_id>f6e67396838b8f143b8da9e0deaad3a0</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_updated_by>admin</sys_updated_by>
-            <sys_updated_on>2026-09-03 10:05:47</sys_updated_on>
-            <value>refunded</value>
+            <sys_updated_on>2026-09-03 10:05:46</sys_updated_on>
+            <value>cancelled</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>approval_status</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Rejected</label>
+            <language>en</language>
+            <name>x_2056616_medica_0_appointment_table</name>
+            <sequence>4</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-03 10:05:46</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-03 10:05:46</sys_updated_on>
+            <value>rejected</value>
         </sys_choice>
     </sys_choice>
 </record_update>

@@ -4,22 +4,22 @@
         <license_condition/>
         <license_model>none</license_model>
         <license_roles/>
-        <name>x_2056616_medica_0_diagnostic_test</name>
+        <name>x_2056616_medica_0_patient_table</name>
         <op_delete>true</op_delete>
         <op_insert>true</op_insert>
         <op_update>true</op_update>
         <owner_condition/>
         <sys_class_name>ua_table_licensing_config</sys_class_name>
         <sys_created_by>admin</sys_created_by>
-        <sys_created_on>2026-09-03 09:27:07</sys_created_on>
-        <sys_id>201e2316834b8f143b8da9e0deaad357</sys_id>
+        <sys_created_on>2026-09-03 09:26:00</sys_created_on>
+        <sys_id>2c9b4fa7c3038f50acfafd0ed4013121</sys_id>
         <sys_mod_count>0</sys_mod_count>
-        <sys_name>x_2056616_medica_0_diagnostic_test</sys_name>
+        <sys_name>x_2056616_medica_0_patient_table</sys_name>
         <sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package>
         <sys_policy/>
         <sys_scope display_value="Medical Diagnosis Center">6d529e9a834f4f143b8da9e0deaad30c</sys_scope>
-        <sys_update_name>ua_table_licensing_config_201e2316834b8f143b8da9e0deaad357</sys_update_name>
+        <sys_update_name>ua_table_licensing_config_2c9b4fa7c3038f50acfafd0ed4013121</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-09-03 09:27:07</sys_updated_on>
+        <sys_updated_on>2026-09-03 09:26:00</sys_updated_on>
     </ua_table_licensing_config>
 </record_update>

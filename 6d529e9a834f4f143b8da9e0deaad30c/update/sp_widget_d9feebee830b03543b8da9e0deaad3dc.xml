@@ -2,12 +2,21 @@
     <sp_widget action="INSERT_OR_UPDATE">
         <category>custom</category>
         <client_script><![CDATA[api.controller = function() {
+
     var c = this;
+
     c.searchQuery = '';
     c.activeCategory = 'all';
     c.sortBy = 'name';
     c.filteredTests = [];
+
+
+    /* =====================================================
+       EXISTING CATEGORY ICONS
+       ===================================================== */
+
     var ICONS = {
+
         'blood': ']]>🩸<![CDATA[',
         'blood test': ']]>🩸<![CDATA[',
         'urine': ']]>🧪<![CDATA[',
@@ -30,465 +39,2728 @@
         'ecg': '❤️',
         'x-ray': ']]>🩻<![CDATA[',
         'xray': ']]>🩻<![CDATA['
+
     };
+
+
+    /* =====================================================
+       EXISTING CATEGORY ICON FUNCTION
+       ===================================================== */
+
     c.getCategoryIcon = function(category) {
-        if (!category) return ']]>🔬<![CDATA[';
+
+        if (!category)
+            return ']]>🔬<![CDATA[';
+
         var key = category.toLowerCase();
+
         for (var k in ICONS) {
-            if (key.indexOf(k) !== -1) return ICONS[k];
+
+            if (key.indexOf(k) !== -1)
+                return ICONS[k];
+
         }
+
         return ']]>🔬<![CDATA[';
+
     };
-    c.truncate = function(text, length) {
-        if (!text) return 'No description available.';
-        return text.length > length ? text.substring(0, length) + '...' : text;
-    };
-    c.filterTests = function() {
-        var all = c.data.tests || [];
-        var q = (c.searchQuery || '').toLowerCase().trim();
-        var cat = c.activeCategory;
-        c.filteredTests = all.filter(function(t) {
-            var matchSearch = !q ||
-                (t.test_name && t.test_name.toLowerCase().indexOf(q) !== -1) ||
-                (t.description && t.description.toLowerCase().indexOf(q) !== -1) ||
-                (t.test_code && t.test_code.toLowerCase().indexOf(q) !== -1) ||
-                (t.category && t.category.toLowerCase().indexOf(q) !== -1);
-            var matchCat = (cat === 'all') || (t.category === cat);
-            return matchSearch && matchCat;
-        });
-        c.sortTests();
-    };
-    c.sortTests = function() {
-        var t = c.filteredTests;
-        if (c.sortBy === 'name') {
-            t.sort(function(a, b) {
-                return (a.test_name || '').localeCompare(b.test_name || '');
-            });
-        } else if (c.sortBy === 'price_asc') {
-            t.sort(function(a, b) {
-                return (a.price || 0) - (b.price || 0);
-            });
-        } else if (c.sortBy === 'price_desc') {
-            t.sort(function(a, b) {
-                return (b.price || 0) - (a.price || 0);
-            });
-        } else if (c.sortBy === 'duration') {
-            t.sort(function(a, b) {
-                return (a.test_duration || '').localeCompare(b.test_duration || '');
-            });
+
+
+    /* =====================================================
+       NEW - TEST SPECIFIC FONT AWESOME ICON
+       VISUAL ONLY
+       ===================================================== */
+
+    c.getTestIcon = function(test) {
+
+        var name =
+            (test.test_name || '').toLowerCase();
+
+
+        /* X-Ray */
+
+        if (
+            name.indexOf('x-ray') !== -1 ||
+            name.indexOf('xray') !== -1
+        ) {
+
+            return 'fa fa-image';
+
         }
+
+
+        /* ECG */
+
+        if (
+            name.indexOf('ecg') !== -1 ||
+            name.indexOf('electrocardiogram') !== -1
+        ) {
+
+            return 'fa fa-heartbeat';
+
+        }
+
+
+        /* COVID / PCR */
+
+        if (
+            name.indexOf('covid') !== -1 ||
+            name.indexOf('pcr') !== -1
+        ) {
+
+            return 'fa fa-shield';
+
+        }
+
+
+        /* Thyroid */
+
+        if (
+            name.indexOf('thyroid') !== -1
+        ) {
+
+            return 'fa fa-leaf';
+
+        }
+
+
+        /* Diabetes / HbA1c */
+
+        if (
+            name.indexOf('diabetes') !== -1 ||
+            name.indexOf('hba1c') !== -1
+        ) {
+
+            return 'fa fa-tint';
+
+        }
+
+
+        /* Liver */
+
+        if (
+            name.indexOf('liver') !== -1
+        ) {
+
+            return 'fa fa-medkit';
+
+        }
+
+
+        /* Kidney */
+
+        if (
+            name.indexOf('kidney') !== -1
+        ) {
+
+            return 'fa fa-filter';
+
+        }
+
+
+        /* Urine */
+
+        if (
+            name.indexOf('urine') !== -1
+        ) {
+
+            return 'fa fa-flask';
+
+        }
+
+
+        /* Vitamin */
+
+        if (
+            name.indexOf('vitamin') !== -1
+        ) {
+
+            return 'fa fa-sun-o';
+
+        }
+
+
+        /* Iron */
+
+        if (
+            name.indexOf('iron') !== -1
+        ) {
+
+            return 'fa fa-cubes';
+
+        }
+
+
+        /* Lipid */
+
+        if (
+            name.indexOf('lipid') !== -1
+        ) {
+
+            return 'fa fa-flask';
+
+        }
+
+
+        /* Blood / CBC */
+
+        if (
+            name.indexOf('blood') !== -1 ||
+            name.indexOf('cbc') !== -1
+        ) {
+
+            return 'fa fa-tint';
+
+        }
+
+
+        /* Default */
+
+        return 'fa fa-flask';
+
     };
+
+
+    /* =====================================================
+       NEW - TEST ICON COLOR
+       VISUAL ONLY
+       ===================================================== */
+
+    c.getTestIconClass = function(test) {
+
+        var name =
+            (test.test_name || '').toLowerCase();
+
+
+        /* X-Ray */
+
+        if (
+            name.indexOf('x-ray') !== -1 ||
+            name.indexOf('xray') !== -1
+        ) {
+
+            return 'mn-icon-xray';
+
+        }
+
+
+        /* ECG */
+
+        if (
+            name.indexOf('ecg') !== -1 ||
+            name.indexOf('electrocardiogram') !== -1
+        ) {
+
+            return 'mn-icon-heart';
+
+        }
+
+
+        /* COVID */
+
+        if (
+            name.indexOf('covid') !== -1 ||
+            name.indexOf('pcr') !== -1
+        ) {
+
+            return 'mn-icon-covid';
+
+        }
+
+
+        /* Thyroid */
+
+        if (
+            name.indexOf('thyroid') !== -1
+        ) {
+
+            return 'mn-icon-thyroid';
+
+        }
+
+
+        /* Diabetes */
+
+        if (
+            name.indexOf('diabetes') !== -1 ||
+            name.indexOf('hba1c') !== -1
+        ) {
+
+            return 'mn-icon-diabetes';
+
+        }
+
+
+        /* Liver */
+
+        if (
+            name.indexOf('liver') !== -1
+        ) {
+
+            return 'mn-icon-liver';
+
+        }
+
+
+        /* Kidney */
+
+        if (
+            name.indexOf('kidney') !== -1
+        ) {
+
+            return 'mn-icon-kidney';
+
+        }
+
+
+        /* Urine */
+
+        if (
+            name.indexOf('urine') !== -1
+        ) {
+
+            return 'mn-icon-urine';
+
+        }
+
+
+        /* Vitamin */
+
+        if (
+            name.indexOf('vitamin') !== -1
+        ) {
+
+            return 'mn-icon-vitamin';
+
+        }
+
+
+        /* Iron */
+
+        if (
+            name.indexOf('iron') !== -1
+        ) {
+
+            return 'mn-icon-iron';
+
+        }
+
+
+        /* Lipid */
+
+        if (
+            name.indexOf('lipid') !== -1
+        ) {
+
+            return 'mn-icon-lipid';
+
+        }
+
+
+        /* Blood / CBC */
+
+        return 'mn-icon-blood';
+
+    };
+
+
+    /* =====================================================
+       EXISTING TRUNCATE
+       ===================================================== */
+
+    c.truncate = function(text, length) {
+
+        if (!text)
+            return 'No description available.';
+
+        return text.length > length
+            ? text.substring(0, length) + '...'
+            : text;
+
+    };
+
+
+    /* =====================================================
+       EXISTING FILTER
+       ===================================================== */
+
+    c.filterTests = function() {
+
+        var all = c.data.tests || [];
+
+        var q =
+            (c.searchQuery || '')
+            .toLowerCase()
+            .trim();
+
+        var cat = c.activeCategory;
+
+
+        c.filteredTests = all.filter(function(t) {
+
+            var matchSearch =
+                !q ||
+
+                (
+                    t.test_name &&
+                    t.test_name
+                        .toLowerCase()
+                        .indexOf(q) !== -1
+                ) ||
+
+                (
+                    t.description &&
+                    t.description
+                        .toLowerCase()
+                        .indexOf(q) !== -1
+                ) ||
+
+                (
+                    t.test_code &&
+                    t.test_code
+                        .toLowerCase()
+                        .indexOf(q) !== -1
+                ) ||
+
+                (
+                    t.category &&
+                    t.category
+                        .toLowerCase()
+                        .indexOf(q) !== -1
+                );
+
+
+            var matchCat =
+                (cat === 'all') ||
+                (t.category === cat);
+
+
+            return matchSearch && matchCat;
+
+        });
+
+
+        c.sortTests();
+
+    };
+
+
+    /* =====================================================
+       EXISTING SORT
+       ===================================================== */
+
+    c.sortTests = function() {
+
+        var t = c.filteredTests;
+
+
+        if (c.sortBy === 'name') {
+
+            t.sort(function(a, b) {
+
+                return (a.test_name || '')
+                    .localeCompare(
+                        b.test_name || ''
+                    );
+
+            });
+
+        }
+
+
+        else if (c.sortBy === 'price_asc') {
+
+            t.sort(function(a, b) {
+
+                return (a.price || 0) -
+                    (b.price || 0);
+
+            });
+
+        }
+
+
+        else if (c.sortBy === 'price_desc') {
+
+            t.sort(function(a, b) {
+
+                return (b.price || 0) -
+                    (a.price || 0);
+
+            });
+
+        }
+
+
+        else if (c.sortBy === 'duration') {
+
+            t.sort(function(a, b) {
+
+                return (a.test_duration || '')
+                    .localeCompare(
+                        b.test_duration || ''
+                    );
+
+            });
+
+        }
+
+    };
+
+
+    /* =====================================================
+       EXISTING CATEGORY FILTER
+       ===================================================== */
+
     c.setCategory = function(cat) {
+
         c.activeCategory = cat;
+
         c.filterTests();
+
     };
+
+
+    /* =====================================================
+       EXISTING CLEAR SEARCH
+       ===================================================== */
+
     c.clearSearch = function() {
+
         c.searchQuery = '';
+
         c.filterTests();
+
     };
+
+
+    /* =====================================================
+       EXISTING RESET FILTERS
+       ===================================================== */
+
     c.resetFilters = function() {
+
         c.searchQuery = '';
+
         c.activeCategory = 'all';
+
         c.sortBy = 'name';
+
         c.filterTests();
+
     };
+
+
+    /* =====================================================
+       EXISTING PORTAL HELPER
+       ===================================================== */
+
     var _getPortal = function() {
-        return window.location.pathname.split('/')[1] || 'sp';
+
+        return window.location
+            .pathname
+            .split('/')[1] || 'sp';
+
     };
+
+
+    /* =====================================================
+       EXISTING BOOK TEST
+       NO LOGIC CHANGED
+       ===================================================== */
+
     c.bookTest = function(test) {
-        sessionStorage.setItem('selected_test_sys_id', test.sys_id);
-        sessionStorage.setItem('selected_test_name', test.test_name || '');
-        sessionStorage.setItem('selected_test_price', test.price || 0);
-        sessionStorage.setItem('selected_test_code', test.test_code || '');
-        sessionStorage.setItem('selected_test_category', test.category || '');
-        sessionStorage.setItem('selected_test_duration', test.test_duration || '');
-        window.location.href = '/' + _getPortal() + '?id=book_appointment';
+
+        sessionStorage.setItem(
+            'selected_test_sys_id',
+            test.sys_id
+        );
+
+        sessionStorage.setItem(
+            'selected_test_name',
+            test.test_name || ''
+        );
+
+        sessionStorage.setItem(
+            'selected_test_price',
+            test.price || 0
+        );
+
+        sessionStorage.setItem(
+            'selected_test_code',
+            test.test_code || ''
+        );
+
+        sessionStorage.setItem(
+            'selected_test_category',
+            test.category || ''
+        );
+
+        sessionStorage.setItem(
+            'selected_test_duration',
+            test.test_duration || ''
+        );
+
+
+        window.location.href =
+            '/' +
+            _getPortal() +
+            '?id=book_appointment';
+
     };
+
+
+    /* =====================================================
+       EXISTING MY BOOKINGS
+       ===================================================== */
+
     c.goToMyBookings = function() {
-        window.location.href = '/' + _getPortal() + '?id=book_appointment';
+
+        window.location.href =
+            '/' +
+            _getPortal() +
+            '?id=book_appointment';
+
     };
+
+
+    /* =====================================================
+       EXISTING MY REPORTS
+       ===================================================== */
+
     c.goToMyReports = function() {
-        window.location.href = '/' + _getPortal() + '?id=lab_reports';
+
+        window.location.href =
+            '/' +
+            _getPortal() +
+            '?id=lab_reports';
+
     };
-    // INIT
-    c.filteredTests = angular.copy(c.data.tests || []);
-    c.data.totalTests = c.filteredTests.length;
+
+
+    /* =====================================================
+       EXISTING PATIENT DASHBOARD
+       ===================================================== */
+
+    c.goToPatientDashboard = function() {
+
+        var portal = _getPortal();
+
+        window.location.href =
+            '/' +
+            portal +
+            '?id=patient_dashboard';
+
+    };
+
+
+    /* =====================================================
+       INIT
+       ===================================================== */
+
+    c.filteredTests =
+        angular.copy(
+            c.data.tests || []
+        );
+
+    c.data.totalTests =
+        c.filteredTests.length;
+
     c.sortTests();
-}]]></client_script>
+
+};]]></client_script>
         <controller_as>c</controller_as>
-        <css>.med-catalog {&#13;
-  --primary: #0a2463;&#13;
-  --primary-light: #1e3a8a;&#13;
-  --accent: #00b4d8;&#13;
-  --accent-dark: #0096c7;&#13;
-  --success: #10b981;&#13;
-  --danger: #ef4444;&#13;
-  --gray-50: #f8fafc;&#13;
-  --gray-100: #f1f5f9;&#13;
-  --gray-200: #e2e8f0;&#13;
-  --gray-400: #94a3b8;&#13;
-  --gray-600: #475569;&#13;
-  --gray-800: #1e293b;&#13;
-  --white: #ffffff;&#13;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);&#13;
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);&#13;
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);&#13;
-  --radius: 16px;&#13;
-  font-family: 'Segoe UI', system-ui, sans-serif;&#13;
-  background: var(--gray-50);&#13;
-  min-height: 100vh;&#13;
-  padding-bottom: 60px;&#13;
-}&#13;
+        <css>/* =========================================================&#13;
+   MEDINOVA DIAGNOSTICS&#13;
+   HOME PAGE — V3&#13;
+   VISUAL ONLY&#13;
+   ========================================================= */&#13;
 &#13;
-/* HERO */&#13;
-.hero-banner {&#13;
-  background: linear-gradient(135deg, #0a2463 0%, #1e3a8a 60%, #0369a1 100%);&#13;
-  padding: 60px 40px 70px;&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  justify-content: space-between;&#13;
-  position: relative;&#13;
-  overflow: hidden;&#13;
-  border-radius: 0 0 40px 40px;&#13;
-}&#13;
-.hero-banner::before {&#13;
-  content: '';&#13;
-  position: absolute;&#13;
-  top: -60px; right: -60px;&#13;
-  width: 340px; height: 340px;&#13;
-  background: rgba(255,255,255,0.04);&#13;
-  border-radius: 50%;&#13;
-}&#13;
-.hero-content { flex: 1; position: relative; z-index: 1; }&#13;
-.hero-badge {&#13;
-  display: inline-flex;&#13;
-  align-items: center;&#13;
-  gap: 8px;&#13;
-  background: rgba(255,255,255,0.12);&#13;
-  border: 1px solid rgba(255,255,255,0.20);&#13;
-  color: #bfdbfe;&#13;
-  font-size: 12px;&#13;
-  font-weight: 600;&#13;
-  letter-spacing: 0.5px;&#13;
-  text-transform: uppercase;&#13;
-  padding: 6px 14px;&#13;
-  border-radius: 20px;&#13;
-  margin-bottom: 20px;&#13;
-}&#13;
-.pulse-dot {&#13;
-  width: 8px; height: 8px;&#13;
-  background: #10b981;&#13;
-  border-radius: 50%;&#13;
-  display: inline-block;&#13;
-  animation: pulse 2s infinite;&#13;
-}&#13;
-@keyframes pulse {&#13;
-  0%,100% { opacity: 1; transform: scale(1); }&#13;
-  50%      { opacity: 0.5; transform: scale(1.4); }&#13;
-}&#13;
-.hero-title {&#13;
-  font-size: 46px;&#13;
-  font-weight: 800;&#13;
-  color: #ffffff;&#13;
-  line-height: 1.1;&#13;
-  margin: 0 0 16px;&#13;
-  letter-spacing: -1px;&#13;
-}&#13;
-.accent-text { color: #00b4d8; }&#13;
-.hero-sub { color: #bfdbfe; font-size: 16px; margin: 0 0 32px; }&#13;
+.med-catalog {&#13;
 &#13;
-/* SEARCH */&#13;
-.search-wrap { position: relative; max-width: 520px; }&#13;
-.search-icon {&#13;
-  position: absolute; left: 16px; top: 50%;&#13;
-  transform: translateY(-50%);&#13;
-  color: #94a3b8; font-size: 16px;&#13;
-}&#13;
-.search-input {&#13;
+  --navy: #123b52;&#13;
+  --navy-dark: #0b2c3d;&#13;
+&#13;
+  --teal: #16a6a3;&#13;
+  --teal-dark: #078b91;&#13;
+  --teal-light: #e5f7f6;&#13;
+&#13;
+  --blue: #397acb;&#13;
+  --blue-light: #eaf2ff;&#13;
+&#13;
+  --green: #15956f;&#13;
+  --green-light: #e6f7f1;&#13;
+&#13;
+  --orange: #df8030;&#13;
+  --orange-light: #fff1e5;&#13;
+&#13;
+  --text: #17384d;&#13;
+  --muted: #708795;&#13;
+&#13;
+  --border: #dce8ed;&#13;
+  --background: #f5f9fa;&#13;
+&#13;
   width: 100%;&#13;
-  padding: 16px 48px 16px 46px;&#13;
-  border: 2px solid transparent;&#13;
-  border-radius: 14px;&#13;
-  font-size: 15px;&#13;
-  background: rgba(255,255,255,0.95);&#13;
-  color: #1e293b;&#13;
-  outline: none;&#13;
-  transition: all 0.2s;&#13;
+  min-height: 100vh;&#13;
+&#13;
+  background: var(--background);&#13;
+&#13;
+  color: var(--text);&#13;
+&#13;
+  font-family:&#13;
+    "Segoe UI",&#13;
+    Arial,&#13;
+    sans-serif;&#13;
+&#13;
+  padding-bottom: 50px;&#13;
+&#13;
   box-sizing: border-box;&#13;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);&#13;
-}&#13;
-.search-input:focus { border-color: #00b4d8; box-shadow: 0 4px 20px rgba(0,180,216,0.25); }&#13;
-.search-clear {&#13;
-  position: absolute; right: 14px; top: 50%;&#13;
-  transform: translateY(-50%);&#13;
-  background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 15px;&#13;
+&#13;
 }&#13;
 &#13;
-/* HERO VISUAL */&#13;
-.hero-visual { position: relative; z-index: 1; margin-left: 60px; }&#13;
-.dna-icon {&#13;
-  font-size: 100px;&#13;
-  animation: float 4s ease-in-out infinite;&#13;
-  filter: drop-shadow(0 8px 24px rgba(0,180,216,0.3));&#13;
-}&#13;
-@keyframes float {&#13;
-  0%,100% { transform: translateY(0); }&#13;
-  50%      { transform: translateY(-12px); }&#13;
-}&#13;
-.float-stat {&#13;
-  position: absolute;&#13;
-  background: rgba(255,255,255,0.12);&#13;
-  backdrop-filter: blur(12px);&#13;
-  border: 1px solid rgba(255,255,255,0.20);&#13;
-  border-radius: 12px;&#13;
-  padding: 10px 16px;&#13;
-  display: flex;&#13;
-  flex-direction: column;&#13;
-  align-items: center;&#13;
-}&#13;
-.stat-1 { top: -10px; right: -40px; }&#13;
-.stat-2 { bottom: -10px; right: -20px; }&#13;
-.stat-num { font-size: 22px; font-weight: 800; color: #ffffff; line-height: 1; }&#13;
-.stat-lbl { font-size: 11px; color: #bfdbfe; margin-top: 2px; white-space: nowrap; }&#13;
 &#13;
-/* CATEGORY BAR */&#13;
-.category-bar {&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  gap: 10px;&#13;
-  padding: 28px 40px 0;&#13;
-  flex-wrap: wrap;&#13;
-}&#13;
-.cat-tab {&#13;
-  padding: 9px 20px;&#13;
-  border-radius: 24px;&#13;
-  border: 2px solid #e2e8f0;&#13;
-  background: #ffffff;&#13;
-  color: #475569;&#13;
-  font-size: 14px;&#13;
-  font-weight: 600;&#13;
-  cursor: pointer;&#13;
-  transition: all 0.2s;&#13;
-  white-space: nowrap;&#13;
-}&#13;
-.cat-tab:hover { border-color: #00b4d8; color: #0096c7; }&#13;
-.cat-tab.active {&#13;
-  background: #0a2463;&#13;
-  border-color: #0a2463;&#13;
-  color: #ffffff;&#13;
-  box-shadow: 0 4px 12px rgba(10,36,99,0.25);&#13;
-}&#13;
+/* =========================================================&#13;
+   HERO&#13;
+   ========================================================= */&#13;
 &#13;
-/* RESULTS BAR */&#13;
-.results-bar {&#13;
+.mn-hero-v3 {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  min-height: 500px;&#13;
+&#13;
+  padding: 55px 6% 75px;&#13;
+&#13;
   display: flex;&#13;
+&#13;
   align-items: center;&#13;
+&#13;
   justify-content: space-between;&#13;
-  padding: 20px 40px 12px;&#13;
-  flex-wrap: wrap;&#13;
-  gap: 12px;&#13;
-}&#13;
-.results-count { color: #475569; font-size: 14px; }&#13;
-.results-count strong { color: #0a2463; }&#13;
-.results-count em { font-style: italic; color: #0096c7; }&#13;
-.sort-wrap { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #475569; }&#13;
-.sort-select {&#13;
-  padding: 6px 12px;&#13;
-  border: 2px solid #e2e8f0;&#13;
-  border-radius: 8px;&#13;
-  font-size: 14px;&#13;
-  background: #ffffff;&#13;
-  color: #1e293b;&#13;
-  cursor: pointer;&#13;
-  outline: none;&#13;
-}&#13;
-.sort-select:focus { border-color: #00b4d8; }&#13;
 &#13;
-/* EMPTY STATE */&#13;
-.empty-state { text-align: center; padding: 80px 40px; }&#13;
-.empty-icon { font-size: 64px; margin-bottom: 16px; }&#13;
-.empty-state h3 { font-size: 22px; color: #1e293b; margin: 0 0 8px; }&#13;
-.empty-state p { color: #475569; margin: 0 0 24px; }&#13;
-.btn-reset {&#13;
-  padding: 10px 24px;&#13;
-  background: #0a2463;&#13;
-  color: #ffffff;&#13;
-  border: none;&#13;
-  border-radius: 8px;&#13;
-  cursor: pointer;&#13;
-  font-weight: 600;&#13;
-  transition: background 0.2s;&#13;
-}&#13;
-.btn-reset:hover { background: #1e3a8a; }&#13;
-&#13;
-/* GRID */&#13;
-.tests-grid {&#13;
-  display: grid;&#13;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));&#13;
-  gap: 24px;&#13;
-  padding: 24px 40px;&#13;
-}&#13;
-&#13;
-/* CARD */&#13;
-.test-card {&#13;
-  background: #ffffff;&#13;
-  border-radius: 16px;&#13;
-  border: 1px solid #e2e8f0;&#13;
   overflow: hidden;&#13;
-  display: flex;&#13;
-  flex-direction: column;&#13;
-  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;&#13;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);&#13;
-}&#13;
-.test-card:hover {&#13;
-  transform: translateY(-5px);&#13;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.14);&#13;
-  border-color: #00b4d8;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      125deg,&#13;
+      #0d3047 0%,&#13;
+      #155675 55%,&#13;
+      #118c91 100%&#13;
+    );&#13;
+&#13;
 }&#13;
 &#13;
-/* CARD HEADER */&#13;
-.card-header {&#13;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);&#13;
-  padding: 20px 20px 16px;&#13;
-  display: flex;&#13;
-  align-items: flex-start;&#13;
-  justify-content: space-between;&#13;
-  border-bottom: 1px solid #f1f5f9;&#13;
+&#13;
+/* BACKGROUND CIRCLES */&#13;
+&#13;
+.mn-hero-bg-circle {&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  border: 1px solid rgba(255,255,255,.10);&#13;
+&#13;
+  pointer-events: none;&#13;
+&#13;
 }&#13;
-.test-icon-wrap {&#13;
-  width: 52px; height: 52px;&#13;
-  background: #ffffff;&#13;
-  border-radius: 14px;&#13;
+&#13;
+.circle-one {&#13;
+&#13;
+  width: 480px;&#13;
+  height: 480px;&#13;
+&#13;
+  right: -190px;&#13;
+  top: -210px;&#13;
+&#13;
+}&#13;
+&#13;
+.circle-two {&#13;
+&#13;
+  width: 280px;&#13;
+  height: 280px;&#13;
+&#13;
+  right: 250px;&#13;
+  bottom: -190px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HERO LEFT&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-hero-content-v3 {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  z-index: 5;&#13;
+&#13;
+  width: 57%;&#13;
+&#13;
+  max-width: 680px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BRAND&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-brand-v3 {&#13;
+&#13;
   display: flex;&#13;
+&#13;
   align-items: center;&#13;
+&#13;
+  gap: 12px;&#13;
+&#13;
+  margin-bottom: 25px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-brand-icon {&#13;
+&#13;
+  width: 48px;&#13;
+  height: 48px;&#13;
+&#13;
+  border-radius: 13px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
   justify-content: center;&#13;
-  font-size: 26px;&#13;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);&#13;
-  flex-shrink: 0;&#13;
-}&#13;
-.card-badges { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }&#13;
-.badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; }&#13;
-.badge-cat    { background: #dbeafe; color: #1d4ed8; }&#13;
-.badge-active { background: #dcfce7; color: #15803d; }&#13;
-.badge-inactive { background: #fee2e2; color: #b91c1c; }&#13;
 &#13;
-/* CARD BODY */&#13;
-.card-body { padding: 20px; flex: 1; }&#13;
-.test-name { font-size: 17px; font-weight: 700; color: #1e293b; margin: 0 0 6px; line-height: 1.3; }&#13;
-.test-code { font-size: 12px; color: #94a3b8; margin: 0 0 10px; font-family: 'Courier New', monospace; }&#13;
-.test-code strong { color: #0a2463; }&#13;
-.test-desc { font-size: 13px; color: #475569; line-height: 1.6; margin: 0 0 16px; }&#13;
-.test-meta { display: flex; gap: 16px; }&#13;
-.meta-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; }&#13;
-.meta-item .fa { color: #00b4d8; font-size: 13px; }&#13;
+  color: var(--teal);&#13;
 &#13;
-/* CARD FOOTER */&#13;
-.card-footer {&#13;
-  padding: 16px 20px;&#13;
-  border-top: 1px solid #f1f5f9;&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  justify-content: space-between;&#13;
-  background: #f8fafc;&#13;
+  font-size: 25px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 8px 25px rgba(0,0,0,.18);&#13;
+&#13;
 }&#13;
-.price-block { display: flex; flex-direction: column; }&#13;
-.price-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }&#13;
-.price-value { font-size: 24px; font-weight: 800; color: #0a2463; line-height: 1.1; }&#13;
-.btn-book {&#13;
-  display: flex;&#13;
-  align-items: center;&#13;
-  gap: 8px;&#13;
-  padding: 11px 22px;&#13;
-  background: linear-gradient(135deg, #00b4d8 0%, #0096c7 100%);&#13;
+&#13;
+&#13;
+.mn-brand-name strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
   color: #ffffff;&#13;
-  border: none;&#13;
-  border-radius: 10px;&#13;
-  font-size: 14px;&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  letter-spacing: 2px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-brand-name span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #b8dce2;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
   font-weight: 700;&#13;
-  cursor: pointer;&#13;
-  transition: all 0.2s;&#13;
-  box-shadow: 0 4px 12px rgba(0,150,199,0.30);&#13;
-}&#13;
-.btn-book:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,150,199,0.40); }&#13;
-.btn-book.btn-disabled {&#13;
-  background: #e2e8f0;&#13;
-  color: #94a3b8;&#13;
-  cursor: not-allowed;&#13;
-  box-shadow: none;&#13;
+&#13;
+  letter-spacing: 2px;&#13;
+&#13;
 }&#13;
 &#13;
-/* RESPONSIVE */&#13;
-@media (max-width: 768px) {&#13;
-  .hero-banner { flex-direction: column; padding: 40px 24px 50px; }&#13;
-  .hero-visual  { display: none; }&#13;
-  .hero-title   { font-size: 32px; }&#13;
-  .tests-grid   { grid-template-columns: 1fr; padding: 16px 20px; }&#13;
-  .category-bar { padding: 20px 20px 0; }&#13;
-  .results-bar  { padding: 16px 20px 8px; }&#13;
-}&#13;
 &#13;
-/* QUICK ACTION CARDS */&#13;
-.quick-actions-bar {&#13;
-  display: flex;&#13;
-  gap: 16px;&#13;
-  padding: 28px 40px 0;&#13;
-  flex-wrap: wrap;&#13;
-}&#13;
+/* =========================================================&#13;
+   TRUST LABEL&#13;
+   ========================================================= */&#13;
 &#13;
-.quick-action-card {&#13;
-  flex: 1;&#13;
-  min-width: 240px;&#13;
-  display: flex;&#13;
+.mn-trust-label {&#13;
+&#13;
+  display: inline-flex;&#13;
+&#13;
   align-items: center;&#13;
-  gap: 16px;&#13;
-  background: #ffffff;&#13;
-  border: 2px solid #e2e8f0;&#13;
-  border-radius: 16px;&#13;
-  padding: 18px 20px;&#13;
-  cursor: pointer;&#13;
-  transition: all 0.25s;&#13;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);&#13;
-}&#13;
 &#13;
-.quick-action-card:hover {&#13;
-  border-color: #00b4d8;&#13;
-  box-shadow: 0 8px 24px rgba(0,180,216,0.15);&#13;
-  transform: translateY(-3px);&#13;
-}&#13;
+  gap: 8px;&#13;
 &#13;
-.qa-icon {&#13;
-  font-size: 36px;&#13;
-  flex-shrink: 0;&#13;
-}&#13;
+  padding: 7px 13px;&#13;
 &#13;
-.qa-info {&#13;
-  flex: 1;&#13;
-  display: flex;&#13;
-  flex-direction: column;&#13;
-  gap: 3px;&#13;
-}&#13;
+  border-radius: 25px;&#13;
 &#13;
-.qa-title {&#13;
-  font-size: 16px;&#13;
+  background: rgba(255,255,255,.10);&#13;
+&#13;
+  border: 1px solid rgba(255,255,255,.18);&#13;
+&#13;
+  color: #d8f5f2;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
   font-weight: 700;&#13;
-  color: #0a2463;&#13;
+&#13;
+  letter-spacing: .8px;&#13;
+&#13;
+  text-transform: uppercase;&#13;
+&#13;
 }&#13;
 &#13;
-.qa-sub {&#13;
-  font-size: 12px;&#13;
-  color: #94a3b8;&#13;
+&#13;
+.mn-live-dot {&#13;
+&#13;
+  width: 7px;&#13;
+  height: 7px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #55ddb0;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 4px rgba(85,221,176,.12);&#13;
+&#13;
 }&#13;
 &#13;
-.qa-arrow {&#13;
-  color: #00b4d8;&#13;
+&#13;
+/* =========================================================&#13;
+   HERO TITLE&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-hero-title-v3 {&#13;
+&#13;
+  margin: 20px 0 15px;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 47px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  line-height: 1.08;&#13;
+&#13;
+  letter-spacing: -1.4px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-hero-title-v3 span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #69d7d1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HERO DESCRIPTION&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-hero-subtitle-v3 {&#13;
+&#13;
+  max-width: 590px;&#13;
+&#13;
+  margin: 0 0 25px;&#13;
+&#13;
+  color: #c8dce4;&#13;
+&#13;
   font-size: 14px;&#13;
+&#13;
+  line-height: 1.7;&#13;
+&#13;
 }&#13;
 &#13;
-@media (max-width: 768px) {&#13;
-  .quick-actions-bar {&#13;
-    padding: 20px 20px 0;&#13;
-    flex-direction: column;&#13;
+&#13;
+/* =========================================================&#13;
+   SEARCH&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-search-v3 {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width: 100%;&#13;
+&#13;
+  max-width: 580px;&#13;
+&#13;
+  height: 56px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border-radius: 13px;&#13;
+&#13;
+  border: 1px solid rgba(255,255,255,.3);&#13;
+&#13;
+  box-shadow:&#13;
+    0 12px 30px rgba(0,0,0,.18);&#13;
+&#13;
+  transition:&#13;
+    border-color .2s ease,&#13;
+    box-shadow .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-search-v3:focus-within {&#13;
+&#13;
+  border-color: #50d3ce;&#13;
+&#13;
+  box-shadow:&#13;
+    0 14px 35px rgba(0,0,0,.22);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-search-v3 &gt; i {&#13;
+&#13;
+  margin-left: 18px;&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+  font-size: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-search-v3 input {&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+  height: 100%;&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  padding: 0 15px;&#13;
+&#13;
+  border: none;&#13;
+&#13;
+  outline: none;&#13;
+&#13;
+  background: transparent;&#13;
+&#13;
+  color: #17384d;&#13;
+&#13;
+  font-size: 14px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-search-v3 input::placeholder {&#13;
+&#13;
+  color: #9aacb5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-search-clear {&#13;
+&#13;
+  width: 36px;&#13;
+  height: 36px;&#13;
+&#13;
+  margin-right: 9px;&#13;
+&#13;
+  border: none;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #edf7f7;&#13;
+&#13;
+  color: #78959d;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-search-clear:hover {&#13;
+&#13;
+  background: #dff1f0;&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TRUST FEATURES&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-trust-features {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 25px;&#13;
+&#13;
+  margin-top: 22px;&#13;
+&#13;
+  flex-wrap: wrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-trust-item {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-trust-icon {&#13;
+&#13;
+  width: 28px;&#13;
+  height: 28px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: rgba(255,255,255,.10);&#13;
+&#13;
+  color: #64dcd5;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-trust-icon i {&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-trust-item strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #e0f1f3;&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-trust-item small {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 2px;&#13;
+&#13;
+  color: #9fc1ca;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   HERO RIGHT&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-hero-visual-v3 {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  width: 39%;&#13;
+&#13;
+  min-height: 420px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* ORBITS */&#13;
+&#13;
+.mn-orbit {&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  border: 1px solid rgba(255,255,255,.13);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.orbit-one {&#13;
+&#13;
+  width: 330px;&#13;
+  height: 330px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.orbit-two {&#13;
+&#13;
+  width: 245px;&#13;
+  height: 245px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MEDICAL PANEL&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-medical-panel {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  z-index: 3;&#13;
+&#13;
+  width: 285px;&#13;
+&#13;
+  min-height: 330px;&#13;
+&#13;
+  padding: 22px;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+  border-radius: 25px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      145deg,&#13;
+      #0c5667 0%,&#13;
+      #117d82 100%&#13;
+    );&#13;
+&#13;
+  box-shadow:&#13;
+    0 25px 60px rgba(0,0,0,.20);&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-medical-panel::before {&#13;
+&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  width: 230px;&#13;
+  height: 230px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  right: -120px;&#13;
+  top: -80px;&#13;
+&#13;
+  border: 1px solid rgba(255,255,255,.12);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-panel-top {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  z-index: 2;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-panel-top &gt; span:first-child {&#13;
+&#13;
+  color: #b7e5e3;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  letter-spacing: 1.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-panel-live {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 5px;&#13;
+&#13;
+  padding: 4px 8px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  background: rgba(255,255,255,.10);&#13;
+&#13;
+  color: #d8fffa;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-panel-live b {&#13;
+&#13;
+  width: 6px;&#13;
+  height: 6px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #5cddb4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   MEDICAL SYMBOL&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-medical-symbol {&#13;
+&#13;
+  width: 115px;&#13;
+  height: 115px;&#13;
+&#13;
+  margin: 45px auto 20px;&#13;
+&#13;
+  border-radius: 32px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 55px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 16px 35px rgba(0,0,0,.17);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-panel-title {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-panel-subtitle {&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: #b9dfdf;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-panel-line {&#13;
+&#13;
+  height: 1px;&#13;
+&#13;
+  margin: 20px 0 15px;&#13;
+&#13;
+  background: rgba(255,255,255,.13);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-panel-footer {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  gap: 45px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-panel-footer strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-panel-footer span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 3px;&#13;
+&#13;
+  color: #a9d5d5;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FLOATING CARDS&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-floating-stat {&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  z-index: 6;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 9px;&#13;
+&#13;
+  padding: 11px 14px;&#13;
+&#13;
+  min-width: 135px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #dfebed;&#13;
+&#13;
+  border-radius: 13px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 15px 35px rgba(20,70,80,.15);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-floating-tests {&#13;
+&#13;
+  top: 50px;&#13;
+&#13;
+  right: -5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-floating-report {&#13;
+&#13;
+  bottom: 55px;&#13;
+&#13;
+  left: -5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-floating-icon {&#13;
+&#13;
+  width: 36px;&#13;
+  height: 36px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  background: #e4f7f6;&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.report-icon {&#13;
+&#13;
+  background: #eef2fb;&#13;
+&#13;
+  color: #5974b8;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-floating-stat strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: var(--navy);&#13;
+&#13;
+  font-size: 18px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-floating-stat span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  color: #8ba0a8;&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   QUICK ACTIONS&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-actions-v3 {&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  z-index: 20;&#13;
+&#13;
+  max-width: 1160px;&#13;
+&#13;
+  margin: -35px auto 0;&#13;
+&#13;
+  padding: 0 20px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(3, minmax(0, 1fr));&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-card {&#13;
+&#13;
+  min-height: 76px;&#13;
+&#13;
+  padding: 13px 15px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 11px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid #dfe9ed;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  box-shadow:&#13;
+    0 10px 28px rgba(30,65,80,.10);&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition:&#13;
+    transform .2s ease,&#13;
+    box-shadow .2s ease,&#13;
+    border-color .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-card:hover {&#13;
+&#13;
+  transform: translateY(-4px);&#13;
+&#13;
+  border-color: #8dd7d2;&#13;
+&#13;
+  box-shadow:&#13;
+    0 16px 32px rgba(30,65,80,.15);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-icon {&#13;
+&#13;
+  width: 43px;&#13;
+  height: 43px;&#13;
+&#13;
+  flex-shrink: 0;&#13;
+&#13;
+  border-radius: 11px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 16px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-icon.blue {&#13;
+&#13;
+  background: var(--blue-light);&#13;
+&#13;
+  color: var(--blue);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-icon.green {&#13;
+&#13;
+  background: var(--green-light);&#13;
+&#13;
+  color: var(--green);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-icon.orange {&#13;
+&#13;
+  background: var(--orange-light);&#13;
+&#13;
+  color: var(--orange);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-content {&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-content strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: var(--navy);&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-content span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  color: #8ca0aa;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-arrow {&#13;
+&#13;
+  color: #91a8b2;&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-action-card:hover .mn-action-arrow {&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TEST SECTION HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-test-heading-v3 {&#13;
+&#13;
+  max-width: 1160px;&#13;
+&#13;
+  margin: 55px auto 0;&#13;
+&#13;
+  padding: 0 20px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: flex-end;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-section-label {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-bottom: 7px;&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  letter-spacing: 1.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-test-heading-v3 h2 {&#13;
+&#13;
+  margin: 0;&#13;
+&#13;
+  color: var(--navy);&#13;
+&#13;
+  font-size: 28px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  letter-spacing: -.5px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-test-heading-v3 p {&#13;
+&#13;
+  margin: 7px 0 0;&#13;
+&#13;
+  color: var(--muted);&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-total-tests-v3 {&#13;
+&#13;
+  text-align: right;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-total-tests-v3 strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+  font-size: 27px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-total-tests-v3 span {&#13;
+&#13;
+  color: var(--muted);&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CATEGORY&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-category-v3 {&#13;
+&#13;
+  max-width: 1160px;&#13;
+&#13;
+  margin: 22px auto 0;&#13;
+&#13;
+  padding: 0 20px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+  flex-wrap: wrap;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-category-button {&#13;
+&#13;
+  padding: 8px 15px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  border: 1px solid var(--border);&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: var(--muted);&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  transition: all .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-category-button:hover {&#13;
+&#13;
+  border-color: var(--teal);&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-category-button.active {&#13;
+&#13;
+  background: var(--navy);&#13;
+&#13;
+  border-color: var(--navy);&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 13px rgba(18,59,82,.17);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESULTS&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-results-v3 {&#13;
+&#13;
+  max-width: 1160px;&#13;
+&#13;
+  margin: auto;&#13;
+&#13;
+  padding: 22px 20px 3px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  gap: 15px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-results-count {&#13;
+&#13;
+  color: var(--muted);&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-results-count strong {&#13;
+&#13;
+  color: var(--navy);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-results-count em {&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+  font-style: normal;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-sort {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 7px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-sort label {&#13;
+&#13;
+  color: var(--muted);&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-sort select {&#13;
+&#13;
+  padding: 7px 28px 7px 10px;&#13;
+&#13;
+  border: 1px solid var(--border);&#13;
+&#13;
+  border-radius: 7px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  color: var(--text);&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  outline: none;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-sort select:focus {&#13;
+&#13;
+  border-color: var(--teal);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TEST GRID&#13;
+   EXACTLY 3 COLUMNS&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-tests-v3 {&#13;
+&#13;
+  max-width: 1200px;&#13;
+&#13;
+  margin: 0 auto;&#13;
+&#13;
+  padding: 20px;&#13;
+&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(3, minmax(0, 1fr));&#13;
+&#13;
+  gap: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TEST CARD&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-test-card-v3 {&#13;
+&#13;
+  min-width: 0;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  border: 1px solid var(--border);&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  overflow: hidden;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  box-shadow:&#13;
+    0 4px 14px rgba(30,65,80,.055);&#13;
+&#13;
+  transition:&#13;
+    transform .2s ease,&#13;
+    box-shadow .2s ease,&#13;
+    border-color .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-test-card-v3:hover {&#13;
+&#13;
+  transform: translateY(-5px);&#13;
+&#13;
+  border-color: #83d6d1;&#13;
+&#13;
+  box-shadow:&#13;
+    0 16px 35px rgba(30,65,80,.13);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CARD HEADER&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-card-header-v3 {&#13;
+&#13;
+  min-height: 108px;&#13;
+&#13;
+  padding: 16px 17px;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: flex-start;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #edf9f9 0%,&#13;
+      #f9fcfd 100%&#13;
+    );&#13;
+&#13;
+  border-bottom: 1px solid #e7eff2;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   TEST ICON&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-test-icon-v3 {&#13;
+&#13;
+  width: 56px;&#13;
+  height: 56px;&#13;
+&#13;
+  border-radius: 14px;&#13;
+&#13;
+  background: #ffffff;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  box-shadow:&#13;
+    0 5px 14px rgba(30,65,80,.08);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* IMPORTANT:&#13;
+   Different icons are now returned by your existing&#13;
+   c.getCategoryIcon(test.test_name)&#13;
+*/&#13;
+&#13;
+.mn-test-icon-v3 .test-icon {&#13;
+&#13;
+  font-size: 27px;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BADGES&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-card-badges {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  align-items: flex-end;&#13;
+&#13;
+  gap: 6px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-category-badge {&#13;
+&#13;
+  padding: 5px 9px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  background: #e4f1ff;&#13;
+&#13;
+  border: 1px solid #c9e1f7;&#13;
+&#13;
+  color: #1769aa;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-available-badge {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 5px;&#13;
+&#13;
+  padding: 5px 9px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  background: #e0f7ed;&#13;
+&#13;
+  border: 1px solid #c6ecdc;&#13;
+&#13;
+  color: #147a59;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-available-badge span {&#13;
+&#13;
+  width: 6px;&#13;
+  height: 6px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #159a72;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-unavailable-badge {&#13;
+&#13;
+  padding: 5px 9px;&#13;
+&#13;
+  border-radius: 20px;&#13;
+&#13;
+  background: #fee7e8;&#13;
+&#13;
+  color: #b4232e;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CARD BODY&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-card-body-v3 {&#13;
+&#13;
+  flex: 1;&#13;
+&#13;
+  padding: 19px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-test-label {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-bottom: 7px;&#13;
+&#13;
+  color: var(--teal-dark);&#13;
+&#13;
+  font-size: 8px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  letter-spacing: 1.3px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-card-body-v3 h3 {&#13;
+&#13;
+  margin: 0 0 6px;&#13;
+&#13;
+  color: var(--navy);&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  line-height: 1.3;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-test-code {&#13;
+&#13;
+  margin-bottom: 13px;&#13;
+&#13;
+  color: #98aab4;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-test-code strong {&#13;
+&#13;
+  color: var(--blue);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-test-description {&#13;
+&#13;
+  min-height: 40px;&#13;
+&#13;
+  margin: 0 0 16px;&#13;
+&#13;
+  color: var(--muted);&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  line-height: 1.65;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   META&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-test-meta-v3 {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 18px;&#13;
+&#13;
+  padding-top: 12px;&#13;
+&#13;
+  border-top: 1px solid #edf2f4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-meta-item {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 6px;&#13;
+&#13;
+  color: var(--muted);&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-meta-item i {&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+  font-size: 11px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CARD FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-card-footer-v3 {&#13;
+&#13;
+  min-height: 76px;&#13;
+&#13;
+  padding: 13px 17px;&#13;
+&#13;
+  box-sizing: border-box;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  background: #fbfdfe;&#13;
+&#13;
+  border-top: 1px solid #edf2f4;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-price {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-price span {&#13;
+&#13;
+  color: #8b9da7;&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-price strong {&#13;
+&#13;
+  margin-top: 2px;&#13;
+&#13;
+  color: var(--navy);&#13;
+&#13;
+  font-size: 22px;&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+  line-height: 1;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   BOOK BUTTON&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-book-button {&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 8px;&#13;
+&#13;
+  padding: 11px 17px;&#13;
+&#13;
+  border: none;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background:&#13;
+    linear-gradient(&#13;
+      135deg,&#13;
+      #16aaa7,&#13;
+      #078d96&#13;
+    );&#13;
+&#13;
+  color: #ffffff !important;&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+  font-weight: 700;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  box-shadow:&#13;
+    0 6px 16px rgba(0,150,155,.22);&#13;
+&#13;
+  transition:&#13;
+    transform .2s ease,&#13;
+    box-shadow .2s ease;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-book-button:hover {&#13;
+&#13;
+  transform: translateY(-2px);&#13;
+&#13;
+  box-shadow:&#13;
+    0 9px 20px rgba(0,150,155,.30);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-book-button i {&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-book-button.disabled {&#13;
+&#13;
+  background: #e5eaed !important;&#13;
+&#13;
+  color: #8999a4 !important;&#13;
+&#13;
+  box-shadow: none;&#13;
+&#13;
+  cursor: not-allowed;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   EMPTY STATE&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-empty-v3 {&#13;
+&#13;
+  padding: 75px 20px;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-empty-icon {&#13;
+&#13;
+  width: 65px;&#13;
+  height: 65px;&#13;
+&#13;
+  margin: 0 auto 18px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: var(--teal-light);&#13;
+&#13;
+  color: var(--teal);&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 23px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-empty-v3 h3 {&#13;
+&#13;
+  margin: 0 0 8px;&#13;
+&#13;
+  color: var(--navy);&#13;
+&#13;
+  font-size: 20px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-empty-v3 p {&#13;
+&#13;
+  margin: 0 0 20px;&#13;
+&#13;
+  color: var(--muted);&#13;
+&#13;
+  font-size: 12px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-reset {&#13;
+&#13;
+  padding: 9px 20px;&#13;
+&#13;
+  border: none;&#13;
+&#13;
+  border-radius: 8px;&#13;
+&#13;
+  background: var(--navy);&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  font-weight: 600;&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   FOOTER&#13;
+   ========================================================= */&#13;
+&#13;
+.mn-footer-v3 {&#13;
+&#13;
+  max-width: 1160px;&#13;
+&#13;
+  margin: 25px auto 0;&#13;
+&#13;
+  padding: 22px 20px;&#13;
+&#13;
+  border-top: 1px solid var(--border);&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  gap: 10px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-footer-mark {&#13;
+&#13;
+  width: 34px;&#13;
+  height: 34px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: var(--navy);&#13;
+&#13;
+  color: #ffffff;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-footer-v3 strong {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  color: var(--navy);&#13;
+&#13;
+  font-size: 10px;&#13;
+&#13;
+  letter-spacing: 1px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.mn-footer-v3 span {&#13;
+&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 4px;&#13;
+&#13;
+  color: var(--muted);&#13;
+&#13;
+  font-size: 9px;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 950px) {&#13;
+&#13;
+  .mn-hero-v3 {&#13;
+&#13;
+    padding-left: 35px;&#13;
+&#13;
+    padding-right: 35px;&#13;
+&#13;
   }&#13;
+&#13;
+  .mn-hero-content-v3 {&#13;
+&#13;
+    width: 100%;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-hero-visual-v3 {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-hero-title-v3 {&#13;
+&#13;
+    font-size: 40px;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 850px) {&#13;
+&#13;
+  .mn-tests-v3 {&#13;
+&#13;
+    grid-template-columns:&#13;
+      repeat(2, minmax(0, 1fr));&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 700px) {&#13;
+&#13;
+  .mn-actions-v3 {&#13;
+&#13;
+    grid-template-columns: 1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-test-heading-v3 {&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-total-tests-v3 {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-results-v3 {&#13;
+&#13;
+    flex-direction: column;&#13;
+&#13;
+    align-items: flex-start;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-tests-v3 {&#13;
+&#13;
+    grid-template-columns: 1fr;&#13;
+&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 500px) {&#13;
+&#13;
+  .mn-hero-v3 {&#13;
+&#13;
+    padding:&#13;
+      35px 20px 60px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-hero-title-v3 {&#13;
+&#13;
+    font-size: 31px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-hero-subtitle-v3 {&#13;
+&#13;
+    font-size: 13px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-trust-features {&#13;
+&#13;
+    gap: 13px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-trust-item small {&#13;
+&#13;
+    display: none;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-actions-v3 {&#13;
+&#13;
+    padding: 0 15px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-test-heading-v3 {&#13;
+&#13;
+    padding: 0 15px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-category-v3 {&#13;
+&#13;
+    padding: 0 15px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-results-v3 {&#13;
+&#13;
+    padding-left: 15px;&#13;
+&#13;
+    padding-right: 15px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-tests-v3 {&#13;
+&#13;
+    padding: 15px;&#13;
+&#13;
+  }&#13;
+&#13;
+  .mn-card-footer-v3 {&#13;
+&#13;
+    padding-left: 14px;&#13;
+&#13;
+    padding-right: 14px;&#13;
+&#13;
+  }&#13;
+&#13;
 }</css>
         <data_table>sp_instance</data_table>
         <demo_data/>
@@ -545,145 +2817,589 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2026-09-04 04:10:02</sys_created_on>
         <sys_id>d9feebee830b03543b8da9e0deaad3dc</sys_id>
-        <sys_mod_count>4</sys_mod_count>
+        <sys_mod_count>15</sys_mod_count>
         <sys_name>Medical Test Catalog</sys_name>
         <sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package>
         <sys_policy/>
         <sys_scope display_value="Medical Diagnosis Center">6d529e9a834f4f143b8da9e0deaad30c</sys_scope>
         <sys_update_name>sp_widget_d9feebee830b03543b8da9e0deaad3dc</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2026-09-04 05:46:51</sys_updated_on>
+        <sys_updated_on>2026-09-07 06:13:38</sys_updated_on>
         <template><![CDATA[<div class="med-catalog">
-<!-- HERO -->
-<div class="hero-banner">
-  <div class="hero-content">
-    <div class="hero-badge"><span class="pulse-dot"></span>Trusted Diagnostics</div>
-    <h1 class="hero-title">Medical Diagnostic<br><span class="accent-text">Test Center</span></h1>
-    <p class="hero-sub">Advanced lab tests. Fast results. Transparent pricing.</p>
-    <div class="search-wrap">
-      <i class="fa fa-search search-icon"></i>
-      <input class="search-input" type="text" placeholder="Search tests, categories..."
-        ng-model="c.searchQuery" ng-change="c.filterTests()" />
-      <button class="search-clear" ng-if="c.searchQuery" ng-click="c.clearSearch()">
-        <i class="fa fa-times"></i>
-      </button>
-    </div>
-  </div>
-  <div class="hero-visual">
-    <div class="dna-icon">]]>🧬<![CDATA[</div>
-    <div class="float-stat stat-1">
-      <span class="stat-num">{{c.data.totalTests}}</span>
-      <span class="stat-lbl">Tests Available</span>
-    </div>
-    <div class="float-stat stat-2">
-      <span class="stat-num">24h</span>
-      <span class="stat-lbl">Avg Report Time</span>
-    </div>
-  </div>
-</div>
 
-<!-- QUICK ACTION CARDS -->
-<div class="quick-actions-bar">
-  <div class="quick-action-card" ng-click="c.goToMyBookings()">
-    <div class="qa-icon">]]>📋<![CDATA[</div>
-    <div class="qa-info">
-      <span class="qa-title">My Bookings</span>
-      <span class="qa-sub">View your appointment history</span>
-    </div>
-    <i class="fa fa-chevron-right qa-arrow"></i>
-  </div>
-  <div class="quick-action-card" ng-click="c.goToMyReports()">
-    <div class="qa-icon">]]>📄<![CDATA[</div>
-    <div class="qa-info">
-      <span class="qa-title">My Reports</span>
-      <span class="qa-sub">Access your lab test results</span>
-    </div>
-    <i class="fa fa-chevron-right qa-arrow"></i>
-  </div>
-</div>
+  <!-- =====================================================
+       HERO SECTION
+       ===================================================== -->
+  <section class="mn-hero-v3">
 
-<!-- CATEGORY TABS -->
-<div class="category-bar">
-  <button class="cat-tab" ng-class="{'active': c.activeCategory === 'all'}" ng-click="c.setCategory('all')">
-    <i class="fa fa-th"></i> All Tests
-  </button>
-  <button class="cat-tab" ng-repeat="cat in c.data.categories"
-    ng-class="{'active': c.activeCategory === cat}" ng-click="c.setCategory(cat)">
-    {{cat}}
-  </button>
-</div>
+    <div class="mn-hero-bg-circle circle-one"></div>
+    <div class="mn-hero-bg-circle circle-two"></div>
 
-<!-- RESULTS BAR -->
-<div class="results-bar">
-  <span class="results-count">
-    Showing <strong>{{c.filteredTests.length}}</strong> test{{c.filteredTests.length !== 1 ? 's' : ''}}
-    <span ng-if="c.searchQuery"> for "<em>{{c.searchQuery}}</em>"</span>
-    <span ng-if="c.activeCategory !== 'all'"> in <em>{{c.activeCategory}}</em></span>
-  </span>
-  <div class="sort-wrap">
-    <label>Sort by:</label>
-    <select ng-model="c.sortBy" ng-change="c.sortTests()" class="sort-select">
-      <option value="name">Name</option>
-      <option value="price_asc">Price: Low to High</option>
-      <option value="price_desc">Price: High to Low</option>
-      <option value="duration">Duration</option>
-    </select>
-  </div>
-</div>
+    <!-- LEFT CONTENT -->
+    <div class="mn-hero-content-v3">
 
-<!-- EMPTY STATE -->
-<div class="empty-state" ng-if="c.filteredTests.length === 0">
-  <div class="empty-icon">]]>🔬<![CDATA[</div>
-  <h3 ng-if="(c.data.tests || []).length === 0">No diagnostic tests found in the database.</h3>
-  <h3 ng-if="(c.data.tests || []).length > 0">No tests match your search.</h3>
-  <p ng-if="(c.data.tests || []).length === 0">
-    Add records to <strong>x_2056616_medica_0_diagnostic_test</strong> and set <strong>Active = true</strong>.
-  </p>
-  <button class="btn-reset" ng-if="(c.data.tests || []).length > 0" ng-click="c.resetFilters()">
-    Clear Filters
-  </button>
-</div>
-
-<!-- TEST CARDS -->
-<div class="tests-grid" ng-if="c.filteredTests.length > 0">
-  <div class="test-card" ng-repeat="test in c.filteredTests">
-    <div class="card-header">
-      <div class="test-icon-wrap">
-        <span class="test-icon">{{c.getCategoryIcon(test.category)}}</span>
-      </div>
-      <div class="card-badges">
-        <span class="badge badge-cat">{{test.category || 'General'}}</span>
-        <span class="badge badge-active" ng-if="test.active">Available</span>
-        <span class="badge badge-inactive" ng-if="!test.active">Unavailable</span>
-      </div>
-    </div>
-    <div class="card-body">
-      <h3 class="test-name">{{test.test_name}}</h3>
-      <p class="test-code">Code: <strong>{{test.test_code}}</strong></p>
-      <p class="test-desc">{{c.truncate(test.description, 100)}}</p>
-      <div class="test-meta">
-        <div class="meta-item" ng-if="test.test_duration">
-          <i class="fa fa-clock-o"></i><span>{{test.test_duration}}</span>
+      <!-- OUR OWN BRAND -->
+      <div class="mn-brand-v3">
+        <div class="mn-brand-icon">
+          <i class="fa fa-plus"></i>
         </div>
-        <div class="meta-item">
-          <i class="fa fa-flask"></i><span>{{test.category || 'General'}}</span>
+
+        <div class="mn-brand-name">
+          <strong>MEDINOVA</strong>
+          <span>DIAGNOSTIC CENTER</span>
         </div>
       </div>
-    </div>
-    <div class="card-footer">
-      <div class="price-block">
-        <span class="price-label">Price</span>
-        <span class="price-value">${{test.price | number:2}}</span>
+
+      <!-- TRUST LABEL -->
+      <div class="mn-trust-label">
+        <span class="mn-live-dot"></span>
+        Trusted Diagnostic Services
       </div>
-      <button class="btn-book" ng-if="test.active" ng-click="c.bookTest(test)">
-        <i class="fa fa-calendar-plus-o"></i> Book Now
-      </button>
-      <button class="btn-book btn-disabled" ng-if="!test.active" disabled>
-        Not Available
-      </button>
+
+      <!-- MAIN TITLE -->
+      <h1 class="mn-hero-title-v3">
+        Better diagnostics.
+        <span>Better decisions.</span>
+      </h1>
+
+      <p class="mn-hero-subtitle-v3">
+        Book diagnostic tests, manage appointments and access
+        your medical reports through one secure healthcare portal.
+      </p>
+
+      <!-- EXISTING SEARCH FUNCTIONALITY -->
+      <div class="mn-search-v3">
+
+        <i class="fa fa-search"></i>
+
+        <input
+          type="text"
+          placeholder="Search tests, categories..."
+          ng-model="c.searchQuery"
+          ng-change="c.filterTests()"
+        />
+
+        <button
+          ng-if="c.searchQuery"
+          ng-click="c.clearSearch()"
+          class="mn-search-clear">
+
+          <i class="fa fa-times"></i>
+
+        </button>
+
+      </div>
+
+      <!-- TRUST FEATURES -->
+      <div class="mn-trust-features">
+
+        <div class="mn-trust-item">
+          <span class="mn-trust-icon">
+            <i class="fa fa-check"></i>
+          </span>
+          <div>
+            <strong>Reliable Testing</strong>
+            <small>Quality-focused diagnostics</small>
+          </div>
+        </div>
+
+        <div class="mn-trust-item">
+          <span class="mn-trust-icon">
+            <i class="fa fa-clock-o"></i>
+          </span>
+          <div>
+            <strong>Fast Reports</strong>
+            <small>Quick report availability</small>
+          </div>
+        </div>
+
+        <div class="mn-trust-item">
+          <span class="mn-trust-icon">
+            <i class="fa fa-shield"></i>
+          </span>
+          <div>
+            <strong>Secure Records</strong>
+            <small>Protected patient information</small>
+          </div>
+        </div>
+
+      </div>
+
     </div>
+
+
+    <!-- RIGHT MEDICAL VISUAL -->
+    <div class="mn-hero-visual-v3">
+
+      <div class="mn-orbit orbit-one"></div>
+      <div class="mn-orbit orbit-two"></div>
+
+      <div class="mn-medical-panel">
+
+        <div class="mn-panel-top">
+          <span>MEDINOVA LAB</span>
+
+          <span class="mn-panel-live">
+            <b></b> LIVE
+          </span>
+        </div>
+
+        <div class="mn-medical-symbol">
+          <i class="fa fa-heartbeat"></i>
+        </div>
+
+        <div class="mn-panel-title">
+          Diagnostic Care
+        </div>
+
+        <div class="mn-panel-subtitle">
+          Accurate. Secure. Patient-focused.
+        </div>
+
+        <div class="mn-panel-line"></div>
+
+        <div class="mn-panel-footer">
+
+          <div>
+            <strong>{{c.data.totalTests}}</strong>
+            <span>Tests</span>
+          </div>
+
+          <div>
+            <strong>24h</strong>
+            <span>Reporting</span>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- FLOATING TEST CARD -->
+      <div class="mn-floating-stat mn-floating-tests">
+
+        <div class="mn-floating-icon">
+          <i class="fa fa-flask"></i>
+        </div>
+
+        <div>
+          <strong>{{c.data.totalTests}}</strong>
+          <span>Tests Available</span>
+        </div>
+
+      </div>
+
+
+      <!-- FLOATING REPORT CARD -->
+      <div class="mn-floating-stat mn-floating-report">
+
+        <div class="mn-floating-icon report-icon">
+          <i class="fa fa-file-text-o"></i>
+        </div>
+
+        <div>
+          <strong>24h</strong>
+          <span>Fast Reporting</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       QUICK ACTIONS
+       ===================================================== -->
+  <section class="mn-actions-v3">
+
+    <!-- PATIENT DASHBOARD -->
+    <div
+      class="mn-action-card"
+      ng-click="c.goToPatientDashboard()">
+
+      <div class="mn-action-icon blue">
+        <i class="fa fa-th-large"></i>
+      </div>
+
+      <div class="mn-action-content">
+        <strong>Patient Dashboard</strong>
+        <span>View your health dashboard</span>
+      </div>
+
+      <i class="fa fa-arrow-right mn-action-arrow"></i>
+
+    </div>
+
+
+    <!-- MY BOOKINGS -->
+    <div
+      class="mn-action-card"
+      ng-click="c.goToMyBookings()">
+
+      <div class="mn-action-icon green">
+        <i class="fa fa-calendar"></i>
+      </div>
+
+      <div class="mn-action-content">
+        <strong>My Bookings</strong>
+        <span>View your appointment history</span>
+      </div>
+
+      <i class="fa fa-arrow-right mn-action-arrow"></i>
+
+    </div>
+
+
+    <!-- MY REPORTS -->
+    <div
+      class="mn-action-card"
+      ng-click="c.goToMyReports()">
+
+      <div class="mn-action-icon orange">
+        <i class="fa fa-file-text-o"></i>
+      </div>
+
+      <div class="mn-action-content">
+        <strong>My Reports</strong>
+        <span>Access your laboratory reports</span>
+      </div>
+
+      <i class="fa fa-arrow-right mn-action-arrow"></i>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       TEST SECTION HEADER
+       ===================================================== -->
+  <section class="mn-test-heading-v3">
+
+    <div>
+
+      <span class="mn-section-label">
+        DIAGNOSTIC SERVICES
+      </span>
+
+      <h2>
+        Find the right test for you
+      </h2>
+
+      <p>
+        Explore our diagnostic services and book your appointment.
+      </p>
+
+    </div>
+
+    <div class="mn-total-tests-v3">
+
+      <strong>{{c.data.totalTests}}</strong>
+
+      <span>
+        Tests Available
+      </span>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       CATEGORY FILTER
+       ===================================================== -->
+  <div class="mn-category-v3">
+
+    <button
+      class="mn-category-button"
+      ng-class="{'active': c.activeCategory === 'all'}"
+      ng-click="c.setCategory('all')">
+
+      <i class="fa fa-th"></i>
+      All Tests
+
+    </button>
+
+
+    <button
+      class="mn-category-button"
+      ng-repeat="cat in c.data.categories"
+      ng-class="{'active': c.activeCategory === cat}"
+      ng-click="c.setCategory(cat)">
+
+      {{cat}}
+
+    </button>
+
   </div>
-</div>
+
+
+  <!-- =====================================================
+       RESULTS + SORT
+       ===================================================== -->
+  <div class="mn-results-v3">
+
+    <span class="mn-results-count">
+
+      Showing
+      <strong>{{c.filteredTests.length}}</strong>
+      test{{c.filteredTests.length !== 1 ? 's' : ''}}
+
+      <span ng-if="c.searchQuery">
+        for
+        <em>"{{c.searchQuery}}"</em>
+      </span>
+
+      <span ng-if="c.activeCategory !== 'all'">
+        in
+        <em>{{c.activeCategory}}</em>
+      </span>
+
+    </span>
+
+
+    <div class="mn-sort">
+
+      <label>Sort by:</label>
+
+      <select
+        ng-model="c.sortBy"
+        ng-change="c.sortTests()">
+
+        <option value="name">Name</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="duration">Duration</option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       EMPTY STATE
+       ===================================================== -->
+  <div
+    class="mn-empty-v3"
+    ng-if="c.filteredTests.length === 0">
+
+    <div class="mn-empty-icon">
+      <i class="fa fa-flask"></i>
+    </div>
+
+    <h3
+      ng-if="(c.data.tests || []).length === 0">
+
+      No diagnostic tests found in the database.
+
+    </h3>
+
+    <h3
+      ng-if="(c.data.tests || []).length > 0">
+
+      No tests match your search.
+
+    </h3>
+
+    <p
+      ng-if="(c.data.tests || []).length === 0">
+
+      Add active diagnostic test records to the system.
+
+    </p>
+
+    <button
+      class="mn-reset"
+      ng-if="(c.data.tests || []).length > 0"
+      ng-click="c.resetFilters()">
+
+      Clear Filters
+
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       TEST CARDS
+       ===================================================== -->
+  <div
+    class="mn-tests-v3"
+    ng-if="c.filteredTests.length > 0">
+
+    <div
+      class="mn-test-card-v3"
+      ng-repeat="test in c.filteredTests">
+
+
+      <!-- CARD HEADER -->
+      <div class="mn-card-header-v3">
+
+        <!-- IMPORTANT:
+             test_name is passed here instead of category.
+             This makes CBC, X-Ray, ECG, COVID etc.
+             get different icons even though your current
+             category data is mostly "Blood Test".
+        -->
+        <div class="mn-test-icon-v3">
+
+          <span class="test-icon">
+            {{c.getCategoryIcon(test.test_name)}}
+          </span>
+
+        </div>
+
+
+        <div class="mn-card-badges">
+
+          <span class="mn-category-badge">
+            {{test.category || 'General'}}
+          </span>
+
+          <span
+            class="mn-available-badge"
+            ng-if="test.active">
+
+            <span></span>
+            Available
+
+          </span>
+
+          <span
+            class="mn-unavailable-badge"
+            ng-if="!test.active">
+
+            Unavailable
+
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- CARD BODY -->
+      <div class="mn-card-body-v3">
+
+        <span class="mn-test-label">
+          DIAGNOSTIC TEST
+        </span>
+
+        <h3>
+          {{test.test_name}}
+        </h3>
+
+        <div class="mn-test-code">
+          TEST CODE:
+          <strong>{{test.test_code}}</strong>
+        </div>
+
+        <p class="mn-test-description">
+
+          {{c.truncate(test.description, 100)}}
+
+        </p>
+
+
+        <!-- TEST META -->
+        <div class="mn-test-meta-v3">
+
+          <div
+            class="mn-meta-item"
+            ng-if="test.test_duration">
+
+            <i class="fa fa-clock-o"></i>
+
+            <span>
+              {{test.test_duration}}
+            </span>
+
+          </div>
+
+
+          <div class="mn-meta-item">
+
+            <i class="fa fa-flask"></i>
+
+            <span>
+              {{test.category || 'General'}}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- CARD FOOTER -->
+      <div class="mn-card-footer-v3">
+
+        <div class="mn-price">
+
+          <span>
+            Test Price
+          </span>
+
+          <strong>
+            ${{test.price | number:2}}
+          </strong>
+
+        </div>
+
+
+        <button
+          class="mn-book-button"
+          ng-if="test.active"
+          ng-click="c.bookTest(test)">
+
+          Book Now
+
+          <i class="fa fa-arrow-right"></i>
+
+        </button>
+
+
+        <button
+          class="mn-book-button disabled"
+          ng-if="!test.active"
+          disabled>
+
+          Not Available
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       FOOTER
+       ===================================================== -->
+  <div class="mn-footer-v3">
+
+    <div class="mn-footer-mark">
+      <i class="fa fa-plus"></i>
+    </div>
+
+    <div>
+
+      <strong>MEDINOVA DIAGNOSTIC CENTER</strong>
+
+      <span>
+        Reliable diagnostics • Secure records • Patient-first care
+      </span>
+
+    </div>
+
+  </div>
 
 </div>]]></template>
     </sp_widget>

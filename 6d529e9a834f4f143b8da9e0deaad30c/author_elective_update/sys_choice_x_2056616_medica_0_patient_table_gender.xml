@@ -6,7 +6,6 @@
             <sys_class_name>sys_choice_set</sys_class_name>
             <sys_created_by>admin</sys_created_by>
             <sys_created_on>2026-09-04 06:49:22</sys_created_on>
-            <sys_id>1f835cba834f03543b8da9e0deaad30f</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_name>gender</sys_name>
             <sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package>
@@ -30,7 +29,6 @@
             <sys_created_on>2026-09-04 06:49:22</sys_created_on>
             <sys_domain>global</sys_domain>
             <sys_domain_path>/</sys_domain_path>
-            <sys_id>17835cba834f03543b8da9e0deaad30f</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_updated_by>admin</sys_updated_by>
             <sys_updated_on>2026-09-04 06:49:22</sys_updated_on>
@@ -50,7 +48,6 @@
             <sys_created_on>2026-09-04 06:49:22</sys_created_on>
             <sys_domain>global</sys_domain>
             <sys_domain_path>/</sys_domain_path>
-            <sys_id>13835cba834f03543b8da9e0deaad311</sys_id>
             <sys_mod_count>0</sys_mod_count>
             <sys_updated_by>admin</sys_updated_by>
             <sys_updated_on>2026-09-04 06:49:22</sys_updated_on>

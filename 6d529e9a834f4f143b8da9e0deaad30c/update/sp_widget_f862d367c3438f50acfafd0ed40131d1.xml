@@ -1,0 +1,2422 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[api.controller = function($location) {
+
+  var c = this;
+
+
+  // =========================================================
+  // INITIALIZATION
+  // =========================================================
+
+  c.$onInit = function() {
+
+    // Dashboard data is loaded by the Server Script.
+    console.log('Patient Dashboard loaded');
+
+  };
+
+
+  // =========================================================
+  // REFRESH DASHBOARD
+  // =========================================================
+
+  c.refresh = function() {
+
+    // Reload the latest appointment/report information
+    // from the ServiceNow server.
+    //
+    // Example:
+    //
+    // Pending → Admin approves → Refresh
+    //                    ↓
+    //              Tracker updates
+    //
+    c.server.update();
+
+  };
+
+
+  // =========================================================
+  // STATUS LABEL
+  // =========================================================
+
+  c.getStatusLabel = function(status) {
+
+    var labels = {
+
+      pending: 'Pending',
+
+      confirmed: 'Confirmed',
+
+      completed: 'Completed',
+
+      cancelled: 'Cancelled',
+
+      rejected: 'Rejected'
+
+    };
+
+    return labels[status] || status || 'Unknown';
+
+  };
+
+
+  // =========================================================
+  // STATUS CSS CLASS
+  // =========================================================
+
+  c.getStatusClass = function(status) {
+
+    var classes = {
+
+      pending: 'status-pending',
+
+      confirmed: 'status-confirmed',
+
+      completed: 'status-completed',
+
+      cancelled: 'status-cancelled',
+
+      rejected: 'status-rejected'
+
+    };
+
+    return classes[status] || 'status-pending';
+
+  };
+
+
+  // =========================================================
+  // APPROVAL LABEL
+  // =========================================================
+
+  c.getApprovalLabel = function(status) {
+
+    var labels = {
+
+      requested: 'Approval Requested',
+
+      approved: 'Approved',
+
+      rejected: 'Rejected'
+
+    };
+
+    return labels[status] || status || '';
+
+  };
+
+
+  // =========================================================
+  // 4-STAGE APPOINTMENT TRACKING
+  // =========================================================
+  //
+  // Our four stages are:
+  //
+  // 1. Pending
+  // 2. Approved
+  // 3. Completed
+  // 4. Report Available
+  //
+  // The current stage is determined from REAL
+  // ServiceNow appointment/report data.
+  //
+  // =========================================================
+
+
+  c.getTrackingStepClass = function(step, appointment) {
+
+    if (!appointment) {
+
+      return 'tracking-upcoming';
+
+    }
+
+
+    // -------------------------------------------------------
+    // Read the actual values from the appointment.
+    // -------------------------------------------------------
+
+    var status =
+      (appointment.status || '').toLowerCase();
+
+    var approvalStatus =
+      (appointment.approval_status || '').toLowerCase();
+
+
+    // -------------------------------------------------------
+    // REPORT AVAILABILITY
+    // -------------------------------------------------------
+    //
+    // Server Script sets has_report = true when a Report
+    // record exists for this appointment.
+    //
+    // -------------------------------------------------------
+
+    var hasReport =
+      appointment.has_report === true;
+
+
+    // -------------------------------------------------------
+    // CANCELLED / REJECTED
+    // -------------------------------------------------------
+
+    if (
+      status === 'cancelled' ||
+      status === 'rejected' ||
+      approvalStatus === 'rejected'
+    ) {
+
+      return 'tracking-cancelled';
+
+    }
+
+
+    // =======================================================
+    // STAGE 1 — PENDING
+    // =======================================================
+
+    if (step === 'pending') {
+
+      // If approval is still requested,
+      // Pending is the current stage.
+      if (approvalStatus === 'requested') {
+
+        return 'tracking-current';
+
+      }
+
+      // Once approved, Pending is completed.
+      if (approvalStatus === 'approved') {
+
+        return 'tracking-completed';
+
+      }
+
+      // Default
+      return 'tracking-upcoming';
+
+    }
+
+
+    // =======================================================
+    // STAGE 2 — APPROVED
+    // =======================================================
+
+    if (step === 'approved') {
+
+      // Approval has happened.
+      if (approvalStatus === 'approved') {
+
+        // If appointment is completed or report exists,
+        // Approved is already completed.
+        if (
+          status === 'completed' ||
+          hasReport
+        ) {
+
+          return 'tracking-completed';
+
+        }
+
+        // Otherwise Approved is the current stage.
+        return 'tracking-current';
+
+      }
+
+      // Approval has not happened yet.
+      return 'tracking-upcoming';
+
+    }
+
+
+    // =======================================================
+    // STAGE 3 — COMPLETED
+    // =======================================================
+
+    if (step === 'completed') {
+
+      if (status === 'completed') {
+
+        // If report exists, Completed is already finished.
+        if (hasReport) {
+
+          return 'tracking-completed';
+
+        }
+
+        // Appointment is completed but report is not
+        // available yet.
+        return 'tracking-current';
+
+      }
+
+      return 'tracking-upcoming';
+
+    }
+
+
+    // =======================================================
+    // STAGE 4 — REPORT AVAILABLE
+    // =======================================================
+
+    if (step === 'report') {
+
+      if (hasReport) {
+
+        return 'tracking-current';
+
+      }
+
+      return 'tracking-upcoming';
+
+    }
+
+
+    return 'tracking-upcoming';
+
+  };
+
+
+  // =========================================================
+  // TRACKING DESCRIPTION
+  // =========================================================
+
+  c.getTrackingDescription = function(step, appointment) {
+
+    if (!appointment) {
+
+      return '';
+
+    }
+
+
+    var approvalStatus =
+      (appointment.approval_status || '').toLowerCase();
+
+    var status =
+      (appointment.status || '').toLowerCase();
+
+    var hasReport =
+      appointment.has_report === true;
+
+
+    // -------------------------------------------------------
+    // PENDING
+    // -------------------------------------------------------
+
+    if (step === 'pending') {
+
+      if (approvalStatus === 'requested') {
+
+        return 'Your booking is waiting for administrator approval.';
+
+      }
+
+      return 'Your booking request was submitted.';
+
+    }
+
+
+    // -------------------------------------------------------
+    // APPROVED
+    // -------------------------------------------------------
+
+    if (step === 'approved') {
+
+      if (approvalStatus === 'approved') {
+
+        return 'Your appointment has been approved.';
+
+      }
+
+      return 'Your appointment is waiting for approval.';
+
+    }
+
+
+    // -------------------------------------------------------
+    // COMPLETED
+    // -------------------------------------------------------
+
+    if (step === 'completed') {
+
+      if (status === 'completed' && !hasReport) {
+
+        return 'Your test is completed. Your report is being prepared.';
+
+      }
+
+      if (hasReport) {
+
+        return 'Your diagnostic test has been completed.';
+
+      }
+
+      return 'Your diagnostic test will be completed after your appointment.';
+
+    }
+
+
+    // -------------------------------------------------------
+    // REPORT
+    // -------------------------------------------------------
+
+    if (step === 'report') {
+
+      if (hasReport) {
+
+        return 'Your diagnostic report is ready to view.';
+
+      }
+
+      return 'Your report will appear here once it is generated.';
+
+    }
+
+
+    return '';
+
+  };
+
+
+  // =========================================================
+  // NAVIGATION
+  // =========================================================
+
+  // Open Test Catalog
+  c.bookTest = function() {
+
+    $location.search({
+
+      id: 'test_catalog'
+
+    });
+
+  };
+
+
+  // Open My Appointments
+  c.goBookings = function() {
+
+    $location.search({
+
+      id: 'my_appointments'
+
+    });
+
+  };
+
+
+  // Open Lab Reports
+  c.goReports = function() {
+
+    $location.search({
+
+      id: 'lab_reports'
+
+    });
+
+  };
+
+};]]></client_script>
+        <controller_as>c</controller_as>
+        <css>/* =========================================================&#13;
+   PATIENT DASHBOARD&#13;
+   All CSS is scoped under .patient-dashboard&#13;
+   so existing portal widgets are not affected.&#13;
+   ========================================================= */&#13;
+&#13;
+.patient-dashboard {&#13;
+  --primary: #0a2463;&#13;
+  --accent: #00b4d8;&#13;
+  --success: #10b981;&#13;
+  --warning: #f59e0b;&#13;
+  --danger: #ef4444;&#13;
+  --purple: #8b5cf6;&#13;
+&#13;
+  --gray-50: #f8fafc;&#13;
+  --gray-100: #f1f5f9;&#13;
+  --gray-200: #e2e8f0;&#13;
+  --gray-500: #64748b;&#13;
+  --gray-700: #334155;&#13;
+  --gray-900: #0f172a;&#13;
+&#13;
+  font-family: "Segoe UI", system-ui, sans-serif;&#13;
+  background: var(--gray-50);&#13;
+  min-height: 100vh;&#13;
+  padding-bottom: 50px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= HEADER ================= */&#13;
+&#13;
+.dashboard-header {&#13;
+  background: linear-gradient(135deg, #0a2463, #1e5c91);&#13;
+  color: white;&#13;
+&#13;
+  padding: 38px 40px;&#13;
+&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: center;&#13;
+&#13;
+  border-radius: 0 0 28px 28px;&#13;
+}&#13;
+&#13;
+.welcome-tag {&#13;
+  display: inline-block;&#13;
+&#13;
+  font-size: 12px;&#13;
+  font-weight: 700;&#13;
+&#13;
+  background: rgba(255,255,255,0.15);&#13;
+  padding: 7px 13px;&#13;
+  border-radius: 20px;&#13;
+&#13;
+  margin-bottom: 12px;&#13;
+}&#13;
+&#13;
+.dashboard-header h1 {&#13;
+  margin: 0 0 8px;&#13;
+  font-size: 30px;&#13;
+  font-weight: 800;&#13;
+}&#13;
+&#13;
+.dashboard-header p {&#13;
+  margin: 0;&#13;
+  opacity: 0.85;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= REFRESH ================= */&#13;
+&#13;
+.refresh-btn {&#13;
+  border: 1px solid rgba(255,255,255,0.35);&#13;
+  background: rgba(255,255,255,0.12);&#13;
+  color: white;&#13;
+&#13;
+  padding: 10px 16px;&#13;
+  border-radius: 9px;&#13;
+&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.refresh-btn:hover {&#13;
+  background: rgba(255,255,255,0.2);&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= MAIN GRID ================= */&#13;
+&#13;
+.top-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: 1fr 1.5fr;&#13;
+  gap: 20px;&#13;
+&#13;
+  padding: 25px 35px 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= PROFILE ================= */&#13;
+&#13;
+.profile-card {&#13;
+  background: white;&#13;
+  border: 1px solid var(--gray-200);&#13;
+&#13;
+  border-radius: 16px;&#13;
+  padding: 25px;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 20px;&#13;
+&#13;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.05);&#13;
+}&#13;
+&#13;
+.profile-avatar {&#13;
+  width: 70px;&#13;
+  height: 70px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: #e0f2fe;&#13;
+  color: var(--primary);&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 28px;&#13;
+}&#13;
+&#13;
+.profile-info h2 {&#13;
+  margin: 0 0 10px;&#13;
+  color: var(--gray-900);&#13;
+  font-size: 20px;&#13;
+}&#13;
+&#13;
+.profile-info p {&#13;
+  margin: 6px 0;&#13;
+  color: var(--gray-500);&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+.profile-info i {&#13;
+  width: 18px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= STATISTICS ================= */&#13;
+&#13;
+.stats-grid {&#13;
+  display: grid;&#13;
+  grid-template-columns: 1fr 1fr;&#13;
+  gap: 15px;&#13;
+}&#13;
+&#13;
+.stat-card {&#13;
+  background: white;&#13;
+  border: 1px solid var(--gray-200);&#13;
+&#13;
+  border-radius: 14px;&#13;
+  padding: 18px;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 15px;&#13;
+&#13;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.04);&#13;
+}&#13;
+&#13;
+.stat-card strong {&#13;
+  display: block;&#13;
+&#13;
+  font-size: 25px;&#13;
+  color: var(--gray-900);&#13;
+}&#13;
+&#13;
+.stat-card span {&#13;
+  display: block;&#13;
+&#13;
+  font-size: 12px;&#13;
+  color: var(--gray-500);&#13;
+&#13;
+  margin-top: 3px;&#13;
+}&#13;
+&#13;
+.stat-icon {&#13;
+  width: 45px;&#13;
+  height: 45px;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 19px;&#13;
+}&#13;
+&#13;
+.stat-icon.blue {&#13;
+  background: #dbeafe;&#13;
+  color: #2563eb;&#13;
+}&#13;
+&#13;
+.stat-icon.orange {&#13;
+  background: #fef3c7;&#13;
+  color: #d97706;&#13;
+}&#13;
+&#13;
+.stat-icon.green {&#13;
+  background: #dcfce7;&#13;
+  color: #16a34a;&#13;
+}&#13;
+&#13;
+.stat-icon.purple {&#13;
+  background: #ede9fe;&#13;
+  color: #7c3aed;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= SECTION HEADER ================= */&#13;
+&#13;
+.section-header {&#13;
+  padding: 30px 35px 15px;&#13;
+&#13;
+  display: flex;&#13;
+  justify-content: space-between;&#13;
+  align-items: center;&#13;
+}&#13;
+&#13;
+.section-header h2 {&#13;
+  margin: 0 0 5px;&#13;
+&#13;
+  font-size: 21px;&#13;
+  color: var(--gray-900);&#13;
+}&#13;
+&#13;
+.section-header p {&#13;
+  margin: 0;&#13;
+&#13;
+  font-size: 13px;&#13;
+  color: var(--gray-500);&#13;
+}&#13;
+&#13;
+.link-btn {&#13;
+  border: none;&#13;
+  background: transparent;&#13;
+&#13;
+  color: var(--accent);&#13;
+&#13;
+  font-weight: 700;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= UPCOMING APPOINTMENT ================= */&#13;
+&#13;
+.upcoming-card {&#13;
+  margin: 0 35px;&#13;
+&#13;
+  background: white;&#13;
+  border: 1px solid var(--gray-200);&#13;
+&#13;
+  border-radius: 16px;&#13;
+  padding: 22px;&#13;
+&#13;
+  display: grid;&#13;
+  grid-template-columns: 2fr 1fr 1fr 1fr;&#13;
+  align-items: center;&#13;
+  gap: 20px;&#13;
+&#13;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.05);&#13;
+}&#13;
+&#13;
+.upcoming-test {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 15px;&#13;
+}&#13;
+&#13;
+.test-icon {&#13;
+  width: 50px;&#13;
+  height: 50px;&#13;
+&#13;
+  border-radius: 12px;&#13;
+&#13;
+  background: #e0f2fe;&#13;
+  color: #0284c7;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 21px;&#13;
+}&#13;
+&#13;
+.upcoming-test h3 {&#13;
+  margin: 0 0 5px;&#13;
+  font-size: 16px;&#13;
+  color: var(--gray-900);&#13;
+}&#13;
+&#13;
+.appointment-number {&#13;
+  font-size: 11px;&#13;
+  color: var(--gray-500);&#13;
+}&#13;
+&#13;
+.appointment-detail {&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 10px;&#13;
+}&#13;
+&#13;
+.appointment-detail &gt; i {&#13;
+  color: var(--accent);&#13;
+  font-size: 18px;&#13;
+}&#13;
+&#13;
+.appointment-detail span {&#13;
+  display: block;&#13;
+  color: var(--gray-500);&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+.appointment-detail strong {&#13;
+  display: block;&#13;
+  color: var(--gray-900);&#13;
+  font-size: 13px;&#13;
+  margin-top: 3px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= STATUS ================= */&#13;
+&#13;
+.status-pill,&#13;
+.approval-pill {&#13;
+  display: inline-block;&#13;
+&#13;
+  padding: 6px 10px;&#13;
+  border-radius: 20px;&#13;
+&#13;
+  font-size: 11px;&#13;
+  font-weight: 700;&#13;
+&#13;
+  margin-right: 5px;&#13;
+}&#13;
+&#13;
+.status-pending {&#13;
+  background: #fef3c7;&#13;
+  color: #92400e;&#13;
+}&#13;
+&#13;
+.status-confirmed {&#13;
+  background: #dcfce7;&#13;
+  color: #166534;&#13;
+}&#13;
+&#13;
+.status-completed {&#13;
+  background: #dbeafe;&#13;
+  color: #1d4ed8;&#13;
+}&#13;
+&#13;
+.status-cancelled,&#13;
+.status-rejected {&#13;
+  background: #fee2e2;&#13;
+  color: #b91c1c;&#13;
+}&#13;
+&#13;
+.approval-pill {&#13;
+  background: #f1f5f9;&#13;
+  color: #475569;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= EMPTY ================= */&#13;
+&#13;
+.empty-card {&#13;
+  margin: 0 35px;&#13;
+&#13;
+  background: white;&#13;
+&#13;
+  border: 1px dashed var(--gray-200);&#13;
+  border-radius: 16px;&#13;
+&#13;
+  padding: 35px;&#13;
+  text-align: center;&#13;
+}&#13;
+&#13;
+.empty-icon {&#13;
+  font-size: 30px;&#13;
+  color: #94a3b8;&#13;
+  margin-bottom: 10px;&#13;
+}&#13;
+&#13;
+.empty-card h3 {&#13;
+  margin: 5px 0;&#13;
+  color: var(--gray-900);&#13;
+}&#13;
+&#13;
+.empty-card p {&#13;
+  color: var(--gray-500);&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= BUTTON ================= */&#13;
+&#13;
+.primary-btn {&#13;
+  background: var(--primary);&#13;
+  color: white;&#13;
+&#13;
+  border: none;&#13;
+  border-radius: 8px;&#13;
+&#13;
+  padding: 10px 18px;&#13;
+&#13;
+  font-weight: 700;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= REPORTS ================= */&#13;
+&#13;
+.reports-grid {&#13;
+  margin: 0 35px;&#13;
+&#13;
+  display: grid;&#13;
+  grid-template-columns: 1fr 1fr;&#13;
+  gap: 15px;&#13;
+}&#13;
+&#13;
+.report-card {&#13;
+  background: white;&#13;
+&#13;
+  border: 1px solid var(--gray-200);&#13;
+  border-radius: 14px;&#13;
+&#13;
+  padding: 18px;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  gap: 15px;&#13;
+}&#13;
+&#13;
+.report-icon {&#13;
+  width: 45px;&#13;
+  height: 45px;&#13;
+&#13;
+  border-radius: 10px;&#13;
+&#13;
+  background: #ede9fe;&#13;
+  color: #7c3aed;&#13;
+&#13;
+  display: flex;&#13;
+  align-items: center;&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 18px;&#13;
+}&#13;
+&#13;
+.report-info {&#13;
+  flex: 1;&#13;
+}&#13;
+&#13;
+.report-info h3 {&#13;
+  margin: 0 0 4px;&#13;
+&#13;
+  font-size: 14px;&#13;
+  color: var(--gray-900);&#13;
+}&#13;
+&#13;
+.report-info span {&#13;
+  display: block;&#13;
+&#13;
+  font-size: 11px;&#13;
+  color: var(--gray-500);&#13;
+}&#13;
+&#13;
+.report-info small {&#13;
+  display: block;&#13;
+&#13;
+  margin-top: 5px;&#13;
+&#13;
+  color: var(--gray-500);&#13;
+  font-size: 11px;&#13;
+}&#13;
+&#13;
+.report-status {&#13;
+  background: #dcfce7;&#13;
+  color: #166534;&#13;
+&#13;
+  padding: 5px 9px;&#13;
+&#13;
+  border-radius: 15px;&#13;
+&#13;
+  font-size: 10px;&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= QUICK ACTIONS ================= */&#13;
+&#13;
+.quick-actions {&#13;
+  margin: 30px 35px 0;&#13;
+&#13;
+  display: grid;&#13;
+  grid-template-columns: repeat(3, 1fr);&#13;
+  gap: 15px;&#13;
+}&#13;
+&#13;
+.quick-actions button {&#13;
+  background: white;&#13;
+&#13;
+  border: 1px solid var(--gray-200);&#13;
+  border-radius: 12px;&#13;
+&#13;
+  padding: 17px;&#13;
+&#13;
+  color: var(--gray-700);&#13;
+&#13;
+  cursor: pointer;&#13;
+&#13;
+  font-weight: 600;&#13;
+}&#13;
+&#13;
+.quick-actions i {&#13;
+  color: var(--accent);&#13;
+  margin-right: 8px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= ERROR ================= */&#13;
+&#13;
+.error-box {&#13;
+  margin: 20px 35px 0;&#13;
+&#13;
+  padding: 12px 15px;&#13;
+&#13;
+  border-radius: 9px;&#13;
+&#13;
+  background: #fee2e2;&#13;
+  color: #991b1b;&#13;
+&#13;
+  font-size: 13px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= RESPONSIVE ================= */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+  .top-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .upcoming-card {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .reports-grid {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+  .quick-actions {&#13;
+    grid-template-columns: 1fr;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+&#13;
+  .dashboard-header {&#13;
+    padding: 25px 20px;&#13;
+&#13;
+    flex-direction: column;&#13;
+    align-items: flex-start;&#13;
+  }&#13;
+&#13;
+  .top-grid,&#13;
+  .section-header,&#13;
+  .upcoming-card,&#13;
+  .reports-grid,&#13;
+  .quick-actions {&#13;
+    margin-left: 15px;&#13;
+    margin-right: 15px;&#13;
+  }&#13;
+&#13;
+  .top-grid {&#13;
+    padding-left: 0;&#13;
+    padding-right: 0;&#13;
+  }&#13;
+&#13;
+  .section-header {&#13;
+    padding-left: 0;&#13;
+    padding-right: 0;&#13;
+  }&#13;
+&#13;
+}&#13;
+/* =========================================================&#13;
+   APPOINTMENT TRACKING&#13;
+   4-STAGE HORIZONTAL PROGRESS TRACKER&#13;
+   ========================================================= */&#13;
+&#13;
+.tracking-section {&#13;
+  margin-top: 5px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= TRACKING CARD ================= */&#13;
+&#13;
+.tracking-card {&#13;
+  margin: 0 35px;&#13;
+&#13;
+  background: white;&#13;
+&#13;
+  border: 1px solid var(--gray-200);&#13;
+&#13;
+  border-radius: 16px;&#13;
+&#13;
+  padding: 25px;&#13;
+&#13;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.05);&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= TRACKING HEADER ================= */&#13;
+&#13;
+.tracking-header {&#13;
+  display: flex;&#13;
+&#13;
+  justify-content: space-between;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  margin-bottom: 28px;&#13;
+&#13;
+  padding-bottom: 18px;&#13;
+&#13;
+  border-bottom: 1px solid var(--gray-200);&#13;
+}&#13;
+&#13;
+.tracking-header h3 {&#13;
+  margin: 0 0 5px;&#13;
+&#13;
+  color: var(--gray-900);&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+  font-weight: 700;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= HORIZONTAL TIMELINE ================= */&#13;
+&#13;
+.tracking-timeline {&#13;
+  display: grid;&#13;
+&#13;
+  grid-template-columns:&#13;
+    repeat(4, 1fr);&#13;
+&#13;
+  position: relative;&#13;
+&#13;
+  gap: 0;&#13;
+&#13;
+  padding-top: 10px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= CONNECTING LINE ================= */&#13;
+&#13;
+.tracking-timeline::before {&#13;
+  content: "";&#13;
+&#13;
+  position: absolute;&#13;
+&#13;
+  top: 32px;&#13;
+&#13;
+  left: 12.5%;&#13;
+&#13;
+  right: 12.5%;&#13;
+&#13;
+  height: 3px;&#13;
+&#13;
+  background: var(--gray-200);&#13;
+&#13;
+  z-index: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= TRACKING STEP ================= */&#13;
+&#13;
+.tracking-step {&#13;
+  position: relative;&#13;
+&#13;
+  z-index: 1;&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  flex-direction: column;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  text-align: center;&#13;
+&#13;
+  padding: 0 12px;&#13;
+&#13;
+  min-width: 0;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= TRACKING ICON ================= */&#13;
+&#13;
+.tracking-icon {&#13;
+  width: 46px;&#13;
+&#13;
+  height: 46px;&#13;
+&#13;
+  border-radius: 50%;&#13;
+&#13;
+  background: white;&#13;
+&#13;
+  border: 3px solid var(--gray-200);&#13;
+&#13;
+  color: var(--gray-500);&#13;
+&#13;
+  display: flex;&#13;
+&#13;
+  align-items: center;&#13;
+&#13;
+  justify-content: center;&#13;
+&#13;
+  font-size: 17px;&#13;
+&#13;
+  margin-bottom: 10px;&#13;
+&#13;
+  transition: all 0.25s ease;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= STEP TITLE ================= */&#13;
+&#13;
+.tracking-step strong {&#13;
+  font-size: 13px;&#13;
+&#13;
+  color: var(--gray-500);&#13;
+&#13;
+  margin-bottom: 5px;&#13;
+}&#13;
+&#13;
+&#13;
+/* ================= STEP DESCRIPTION ================= */&#13;
+&#13;
+.tracking-step span {&#13;
+  font-size: 10px;&#13;
+&#13;
+  line-height: 1.4;&#13;
+&#13;
+  color: var(--gray-500);&#13;
+&#13;
+  max-width: 150px;&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   COMPLETED STEP&#13;
+   ========================================================= */&#13;
+&#13;
+.tracking-step.tracking-completed&#13;
+.tracking-icon {&#13;
+&#13;
+  background: var(--success);&#13;
+&#13;
+  border-color: var(--success);&#13;
+&#13;
+  color: white;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.tracking-step.tracking-completed strong {&#13;
+&#13;
+  color: var(--success);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CURRENT STEP&#13;
+   ========================================================= */&#13;
+&#13;
+.tracking-step.tracking-current&#13;
+.tracking-icon {&#13;
+&#13;
+  background: var(--primary);&#13;
+&#13;
+  border-color: var(--primary);&#13;
+&#13;
+  color: white;&#13;
+&#13;
+  box-shadow:&#13;
+    0 0 0 5px rgba(10,36,99,0.10);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.tracking-step.tracking-current strong {&#13;
+&#13;
+  color: var(--primary);&#13;
+&#13;
+  font-weight: 800;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   CANCELLED / REJECTED&#13;
+   ========================================================= */&#13;
+&#13;
+.tracking-step.tracking-cancelled&#13;
+.tracking-icon {&#13;
+&#13;
+  background: var(--danger);&#13;
+&#13;
+  border-color: var(--danger);&#13;
+&#13;
+  color: white;&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+.tracking-step.tracking-cancelled strong {&#13;
+&#13;
+  color: var(--danger);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   UPCOMING STEP&#13;
+   ========================================================= */&#13;
+&#13;
+.tracking-step.tracking-upcoming&#13;
+.tracking-icon {&#13;
+&#13;
+  background: white;&#13;
+&#13;
+  border-color: var(--gray-200);&#13;
+&#13;
+  color: var(--gray-500);&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+/* =========================================================&#13;
+   RESPONSIVE&#13;
+   ========================================================= */&#13;
+&#13;
+@media (max-width: 900px) {&#13;
+&#13;
+  .tracking-card {&#13;
+    margin-left: 20px;&#13;
+    margin-right: 20px;&#13;
+  }&#13;
+&#13;
+  .tracking-step {&#13;
+    padding: 0 6px;&#13;
+  }&#13;
+&#13;
+  .tracking-step span {&#13;
+    max-width: 120px;&#13;
+  }&#13;
+&#13;
+}&#13;
+&#13;
+&#13;
+@media (max-width: 600px) {&#13;
+&#13;
+  .tracking-card {&#13;
+    margin-left: 15px;&#13;
+    margin-right: 15px;&#13;
+&#13;
+    padding: 20px 10px;&#13;
+  }&#13;
+&#13;
+  .tracking-timeline {&#13;
+    grid-template-columns: 1fr;&#13;
+&#13;
+    gap: 20px;&#13;
+&#13;
+    padding-top: 0;&#13;
+  }&#13;
+&#13;
+&#13;
+  /* Vertical line on mobile */&#13;
+  .tracking-timeline::before {&#13;
+&#13;
+    top: 23px;&#13;
+&#13;
+    bottom: 23px;&#13;
+&#13;
+    left: 50%;&#13;
+&#13;
+    right: auto;&#13;
+&#13;
+    width: 3px;&#13;
+&#13;
+    height: auto;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .tracking-step {&#13;
+&#13;
+    display: grid;&#13;
+&#13;
+    grid-template-columns: 46px 1fr;&#13;
+&#13;
+    column-gap: 15px;&#13;
+&#13;
+    text-align: left;&#13;
+&#13;
+    align-items: center;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .tracking-icon {&#13;
+&#13;
+    grid-row: span 2;&#13;
+&#13;
+    margin-bottom: 0;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .tracking-step strong {&#13;
+&#13;
+    margin-bottom: 2px;&#13;
+&#13;
+  }&#13;
+&#13;
+&#13;
+  .tracking-step span {&#13;
+&#13;
+    max-width: none;&#13;
+&#13;
+  }&#13;
+&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Displays patient profile, appointment summary, upcoming appointments, and available reports.</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>patient_dashboard</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+  
+}]]></link>
+        <name>Patient Dashboard</name>
+        <option_schema/>
+        <public>true</public>
+        <roles/>
+        <script><![CDATA[(function() {
+
+    // =========================================================
+    // INITIAL DATA OBJECT
+    // =========================================================
+
+    data.error = '';
+
+    data.currentUser = {
+        first_name: '',
+        last_name: '',
+        full_name: '',
+        email: ''
+    };
+
+    data.patient = {
+        sys_id: '',
+        first_name: '',
+        last_name: '',
+        full_name: '',
+        email: '',
+        phone_number: '',
+        address: ''
+    };
+
+    data.stats = {
+        total: 0,
+        pending: 0,
+        completed: 0,
+        reports: 0
+    };
+
+    data.upcoming = null;
+
+    data.recentReports = [];
+
+
+    try {
+
+        // =======================================================
+        // STEP 1 — GET LOGGED-IN USER
+        // =======================================================
+
+        var userID = gs.getUserID();
+        var userEmail = gs.getUser().getEmail() || '';
+
+        if (!userID) {
+            data.error = 'Unable to identify the logged-in user.';
+            return;
+        }
+
+
+        // Get basic information from sys_user.
+        var userGr = new GlideRecord('sys_user');
+
+        if (userGr.get(userID)) {
+
+            data.currentUser.first_name =
+                userGr.getValue('first_name') || '';
+
+            data.currentUser.last_name =
+                userGr.getValue('last_name') || '';
+
+            data.currentUser.full_name =
+                userGr.getDisplayValue('name') || '';
+
+            data.currentUser.email =
+                userGr.getValue('email') || userEmail;
+        }
+
+
+        // =======================================================
+        // STEP 2 — FIND PATIENT RECORD
+        // =======================================================
+
+        var patientGr = new GlideRecord(
+            'x_2056616_medica_0_patient_table'
+        );
+
+        var patientFound = false;
+
+
+        // First preference:
+        // Find Patient linked directly to the logged-in sys_user.
+        patientGr.addQuery('user', userID);
+        patientGr.setLimit(1);
+        patientGr.query();
+
+        if (patientGr.next()) {
+            patientFound = true;
+        }
+
+
+        // If user reference did not find anything,
+        // try matching Patient by email.
+        if (!patientFound && userEmail) {
+
+            patientGr = new GlideRecord(
+                'x_2056616_medica_0_patient_table'
+            );
+
+            patientGr.addQuery('email', userEmail);
+            patientGr.setLimit(1);
+            patientGr.query();
+
+            if (patientGr.next()) {
+                patientFound = true;
+            }
+
+        }
+
+
+        // =======================================================
+        // STEP 3 — BUILD PATIENT PROFILE
+        // =======================================================
+
+        var patientSysId = '';
+
+        if (patientFound) {
+
+            patientSysId = patientGr.getUniqueValue();
+
+            var firstName =
+                patientGr.getValue('first_name') || '';
+
+            var lastName =
+                patientGr.getValue('last_name') || '';
+
+            data.patient.sys_id = patientSysId;
+
+            data.patient.first_name = firstName;
+
+            data.patient.last_name = lastName;
+
+            data.patient.full_name =
+                (firstName + ' ' + lastName).trim();
+
+            data.patient.email =
+                patientGr.getValue('email') || '';
+
+            data.patient.phone_number =
+                patientGr.getValue('phone_number') || '';
+
+            data.patient.address =
+                patientGr.getValue('address') || '';
+
+        }
+
+
+        // =======================================================
+        // STEP 4 — GET APPOINTMENTS
+        // =======================================================
+
+        if (!patientSysId) {
+
+            // Patient does not exist yet.
+            // Dashboard can still show the user profile,
+            // but there will be no appointment/report data.
+            return;
+
+        }
+
+
+        var appointmentGr = new GlideRecord(
+            'x_2056616_medica_0_appointment_table'
+        );
+
+        appointmentGr.addQuery('patient', patientSysId);
+
+        appointmentGr.orderByDesc('scheduled_date');
+
+        appointmentGr.query();
+
+
+        // Current date/time.
+        var now = new GlideDateTime();
+
+
+        while (appointmentGr.next()) {
+
+            // -----------------------------------------------
+            // BASIC APPOINTMENT INFORMATION
+            // -----------------------------------------------
+
+            var appointmentNumber =
+                appointmentGr.getValue('appointment_number') || '';
+
+            var status =
+                appointmentGr.getValue('status') || '';
+
+            var approvalStatus =
+                appointmentGr.getValue('approval_status') || '';
+
+            var scheduledRaw =
+                appointmentGr.getValue('scheduled_date') || '';
+
+            var slotTime =
+                appointmentGr.getValue('slot_time') || '';
+
+
+            // -----------------------------------------------
+            // COUNT APPOINTMENTS
+            // -----------------------------------------------
+
+            data.stats.total++;
+
+
+            if (status == 'pending') {
+                data.stats.pending++;
+            }
+
+
+            if (status == 'completed') {
+                data.stats.completed++;
+            }
+
+
+            // -----------------------------------------------
+            // GET TEST NAME
+            // -----------------------------------------------
+
+            var testName = '';
+
+            var testSysId =
+                appointmentGr.getValue('test') || '';
+
+
+            if (testSysId) {
+
+                var testGr = new GlideRecord(
+                    'x_2056616_medica_0_diagnostic_test'
+                );
+
+                if (testGr.get(testSysId)) {
+
+                    testName =
+                        testGr.getValue('test_name') || '';
+
+                }
+
+            }
+
+
+            // -----------------------------------------------
+            // FORMAT DATE
+            // -----------------------------------------------
+
+            var scheduledDisplay = '';
+
+            if (scheduledRaw) {
+
+                try {
+
+                    var scheduledGdt =
+                        new GlideDateTime(scheduledRaw);
+
+                    scheduledDisplay =
+                        scheduledGdt.getLocalDate().getValue();
+
+                } catch (dateError) {
+
+                    scheduledDisplay =
+                        scheduledRaw.split(' ')[0] || scheduledRaw;
+
+                }
+
+            }
+
+
+            // -----------------------------------------------
+            // FIND UPCOMING APPOINTMENT
+            // -----------------------------------------------
+
+            // Only consider appointments that are not cancelled
+            // or rejected.
+
+            if (
+                scheduledRaw &&
+                status != 'cancelled' &&
+                status != 'rejected'
+            ) {
+
+                try {
+
+                    var appointmentDate =
+                        new GlideDateTime(scheduledRaw);
+
+                    // If appointment is in the future,
+                    // use it as the upcoming appointment.
+                    if (appointmentDate.getNumericValue() >= now.getNumericValue()) {
+
+                        if (!data.upcoming) {
+
+                            data.upcoming = {
+
+                                // Unique appointment record ID.
+                                // We use this to connect the appointment
+                                // with its corresponding report.
+                                appointment_sys_id: appointmentGr.getUniqueValue(),
+
+                                appointment_number: appointmentNumber,
+
+                                test_name: testName || 'Diagnostic Test',
+
+                                status: status,
+
+                                approval_status: approvalStatus,
+
+                                scheduled_date: scheduledRaw,
+
+                                scheduled_date_display: scheduledDisplay,
+
+                                slot_time: slotTime,
+
+                                // Initially assume the report is not available.
+                                // We will update this after checking the Report table.
+                                has_report: false
+
+                            };
+
+                        }
+
+                    }
+
+                } catch (upcomingError) {
+
+                    // Ignore date parsing errors.
+                }
+
+            }
+
+        }
+
+
+        // =======================================================
+        // STEP 5 — GET PATIENT REPORTS
+        // =======================================================
+
+        var reportGr = new GlideRecord(
+            'x_2056616_medica_0_report_table'
+        );
+
+        reportGr.addQuery('patient', patientSysId);
+
+        // Latest reports first
+        reportGr.orderByDesc('sys_created_on');
+
+        reportGr.query();
+
+
+        // Count all reports separately
+        var reportCount = 0;
+
+
+        while (reportGr.next()) {
+
+            // Count every report
+            reportCount++;
+
+
+            // Only display the latest 4 reports
+            if (data.recentReports.length >= 4) {
+                continue;
+            }
+
+
+            var reportNumber =
+                reportGr.getValue('report_number') || '';
+
+            var reportStatus =
+                reportGr.getValue('status') || '';
+
+
+            // -----------------------------------------------
+            // REPORT DATE
+            // -----------------------------------------------
+
+            var reportDateRaw =
+                reportGr.getValue('report_date') || '';
+
+            var reportDateDisplay = '';
+
+            if (reportDateRaw) {
+
+                try {
+
+                    var reportDate =
+                        new GlideDateTime(reportDateRaw);
+
+                    reportDateDisplay =
+                        reportDate.getLocalDate().getValue();
+
+                } catch (reportDateError) {
+
+                    reportDateDisplay =
+                        reportDateRaw.split(' ')[0] || reportDateRaw;
+
+                }
+
+            }
+
+
+            // -----------------------------------------------
+            // GET TEST NAME THROUGH APPOINTMENT
+            // -----------------------------------------------
+
+            var reportTestName = '';
+
+            var reportAppointment =
+                reportGr.getValue('appointment') || '';
+            // =======================================================
+            // CHECK WHETHER THIS REPORT BELONGS TO THE UPCOMING
+            // APPOINTMENT
+            // =======================================================
+
+            if (
+                data.upcoming &&
+                reportAppointment === data.upcoming.appointment_sys_id
+            ) {
+
+                // A report record exists for the appointment.
+                // Therefore the final tracking stage is available.
+                data.upcoming.has_report = true;
+
+            }
+
+
+            if (reportAppointment) {
+
+                var reportApptGr = new GlideRecord(
+                    'x_2056616_medica_0_appointment_table'
+                );
+
+                if (reportApptGr.get(reportAppointment)) {
+
+                    var reportTest =
+                        reportApptGr.getValue('test') || '';
+
+
+                    if (reportTest) {
+
+                        var reportTestGr = new GlideRecord(
+                            'x_2056616_medica_0_diagnostic_test'
+                        );
+
+                        if (reportTestGr.get(reportTest)) {
+
+                            reportTestName =
+                                reportTestGr.getValue('test_name') || '';
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+
+            // -----------------------------------------------
+            // SEND REPORT DATA TO CLIENT
+            // -----------------------------------------------
+
+            data.recentReports.push({
+
+                report_number: reportNumber,
+
+                test_name: reportTestName || 'Diagnostic Report',
+
+                status: reportStatus || 'Ready',
+
+                report_date_display: reportDateDisplay || 'N/A'
+
+            });
+
+        }
+
+
+        // -------------------------------------------------------
+        // TOTAL REPORT COUNT
+        // -------------------------------------------------------
+
+        data.stats.reports = reportCount;
+
+
+    } catch (e) {
+
+        // =====================================================
+        // ERROR HANDLING
+        // =====================================================
+
+        gs.error(
+            'Patient Dashboard Widget Error: ' + e.message
+        );
+
+        data.error =
+            'Unable to load dashboard information.';
+
+    }
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-07 04:40:24</sys_created_on>
+        <sys_id>f862d367c3438f50acfafd0ed40131d1</sys_id>
+        <sys_mod_count>7</sys_mod_count>
+        <sys_name>Patient Dashboard</sys_name>
+        <sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Medical Diagnosis Center">6d529e9a834f4f143b8da9e0deaad30c</sys_scope>
+        <sys_update_name>sp_widget_f862d367c3438f50acfafd0ed40131d1</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-07 05:26:26</sys_updated_on>
+        <template><![CDATA[<div class="patient-dashboard">
+
+  <!-- ================= HEADER ================= -->
+  <div class="dashboard-header">
+
+    <div>
+      <span class="welcome-tag">
+        <i class="fa fa-heartbeat"></i> Medical Diagnostic Center
+      </span>
+
+      <h1>Welcome, {{c.data.patient.first_name || c.data.currentUser.first_name}} ]]>👋<![CDATA[</h1>
+
+      <p>Your health appointments, tests and reports — all in one place.</p>
+    </div>
+
+    <!-- Refresh dashboard data -->
+    <button class="refresh-btn" ng-click="c.refresh()">
+      <i class="fa fa-refresh"></i> Refresh
+    </button>
+
+  </div>
+
+
+  <!-- ================= ERROR MESSAGE ================= -->
+
+  <div class="error-box" ng-if="c.data.error">
+    <i class="fa fa-exclamation-circle"></i>
+    {{c.data.error}}
+  </div>
+
+
+  <!-- ================= PROFILE + STATS ================= -->
+
+  <div class="top-grid">
+
+    <!-- PATIENT PROFILE CARD -->
+    <div class="profile-card">
+
+      <div class="profile-avatar">
+        <i class="fa fa-user"></i>
+      </div>
+
+      <div class="profile-info">
+
+        <h2>
+          {{c.data.patient.full_name || c.data.currentUser.full_name}}
+        </h2>
+
+        <p>
+          <i class="fa fa-envelope"></i>
+          {{c.data.patient.email || c.data.currentUser.email || 'N/A'}}
+        </p>
+
+        <p>
+          <i class="fa fa-phone"></i>
+          {{c.data.patient.phone_number || 'N/A'}}
+        </p>
+
+        <p>
+          <i class="fa fa-map-marker"></i>
+          {{c.data.patient.address || 'Address not available'}}
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- APPOINTMENT STATS -->
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <i class="fa fa-calendar"></i>
+        </div>
+
+        <div>
+          <strong>{{c.data.stats.total}}</strong>
+          <span>Total Appointments</span>
+        </div>
+      </div>
+
+
+      <div class="stat-card">
+        <div class="stat-icon orange">
+          <i class="fa fa-clock-o"></i>
+        </div>
+
+        <div>
+          <strong>{{c.data.stats.pending}}</strong>
+          <span>Pending</span>
+        </div>
+      </div>
+
+
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <i class="fa fa-check-circle"></i>
+        </div>
+
+        <div>
+          <strong>{{c.data.stats.completed}}</strong>
+          <span>Completed</span>
+        </div>
+      </div>
+
+
+      <div class="stat-card">
+        <div class="stat-icon purple">
+          <i class="fa fa-file-text"></i>
+        </div>
+
+        <div>
+          <strong>{{c.data.stats.reports}}</strong>
+          <span>Reports Available</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+
+ <!-- ================= UPCOMING APPOINTMENT ================= -->
+
+<div class="section-header">
+
+  <div>
+    <h2>Upcoming Appointment</h2>
+    <p>Your next scheduled diagnostic test.</p>
+  </div>
+
+  <button class="link-btn" ng-click="c.goBookings()">
+    View All <i class="fa fa-arrow-right"></i>
+  </button>
+
+</div>
+
+
+<!-- ================= APPOINTMENT CARD ================= -->
+
+<div class="upcoming-card" ng-if="c.data.upcoming">
+
+  <!-- Test information -->
+  <div class="upcoming-test">
+
+    <div class="test-icon">
+      <i class="fa fa-flask"></i>
+    </div>
+
+    <div>
+
+      <h3>{{c.data.upcoming.test_name}}</h3>
+
+      <span class="appointment-number">
+        {{c.data.upcoming.appointment_number}}
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- Date -->
+  <div class="appointment-detail">
+
+    <i class="fa fa-calendar"></i>
+
+    <div>
+      <span>Date</span>
+      <strong>
+        {{c.data.upcoming.scheduled_date_display}}
+      </strong>
+    </div>
+
+  </div>
+
+
+  <!-- Time -->
+  <div class="appointment-detail">
+
+    <i class="fa fa-clock-o"></i>
+
+    <div>
+      <span>Time</span>
+
+      <strong>
+        {{c.data.upcoming.slot_time || 'N/A'}}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <!-- Status -->
+  <div>
+
+    <span
+      class="status-pill"
+      ng-class="c.getStatusClass(c.data.upcoming.status)"
+    >
+      {{c.getStatusLabel(c.data.upcoming.status)}}
+    </span>
+
+
+    <span
+      class="approval-pill"
+      ng-if="c.data.upcoming.approval_status"
+    >
+      {{c.getApprovalLabel(c.data.upcoming.approval_status)}}
+    </span>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     APPOINTMENT TRACKING
+     4-stage real-time appointment progress
+     ========================================================= -->
+
+<div class="tracking-section" ng-if="c.data.upcoming">
+
+  <!-- Tracking Header -->
+  <div class="section-header">
+
+    <div>
+
+      <h2>Appointment Tracking</h2>
+
+      <p>
+        Track your diagnostic test progress.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- Tracking Card -->
+  <div class="tracking-card">
+
+
+    <!-- Appointment information -->
+
+    <div class="tracking-header">
+
+      <div>
+
+        <h3>
+          {{c.data.upcoming.test_name}}
+        </h3>
+
+        <span class="appointment-number">
+          {{c.data.upcoming.appointment_number}}
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         HORIZONTAL TRACKER
+         ===================================================== -->
+
+    <div class="tracking-timeline">
+
+
+      <!-- ================= PENDING ================= -->
+
+      <div
+        class="tracking-step"
+        ng-class="c.getTrackingStepClass(
+          'pending',
+          c.data.upcoming
+        )"
+      >
+
+        <div class="tracking-icon">
+
+          <i class="fa fa-clock-o"></i>
+
+        </div>
+
+        <strong>
+          Pending
+        </strong>
+
+        <span>
+          {{c.getTrackingDescription(
+            'pending',
+            c.data.upcoming
+          )}}
+        </span>
+
+      </div>
+
+
+      <!-- ================= APPROVED ================= -->
+
+      <div
+        class="tracking-step"
+        ng-class="c.getTrackingStepClass(
+          'approved',
+          c.data.upcoming
+        )"
+      >
+
+        <div class="tracking-icon">
+
+          <i class="fa fa-check"></i>
+
+        </div>
+
+        <strong>
+          Approved
+        </strong>
+
+        <span>
+          {{c.getTrackingDescription(
+            'approved',
+            c.data.upcoming
+          )}}
+        </span>
+
+      </div>
+
+
+      <!-- ================= COMPLETED ================= -->
+
+      <div
+        class="tracking-step"
+        ng-class="c.getTrackingStepClass(
+          'completed',
+          c.data.upcoming
+        )"
+      >
+
+        <div class="tracking-icon">
+
+          <i class="fa fa-check-circle"></i>
+
+        </div>
+
+        <strong>
+          Completed
+        </strong>
+
+        <span>
+          {{c.getTrackingDescription(
+            'completed',
+            c.data.upcoming
+          )}}
+        </span>
+
+      </div>
+
+
+      <!-- ================= REPORT AVAILABLE ================= -->
+
+      <div
+        class="tracking-step"
+        ng-class="c.getTrackingStepClass(
+          'report',
+          c.data.upcoming
+        )"
+      >
+
+        <div class="tracking-icon">
+
+          <i class="fa fa-file-text"></i>
+
+        </div>
+
+        <strong>
+          Report Available
+        </strong>
+
+        <span>
+          {{c.getTrackingDescription(
+            'report',
+            c.data.upcoming
+          )}}
+        </span>
+
+      </div>
+
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ================= NO UPCOMING APPOINTMENT ================= -->
+
+<div class="empty-card" ng-if="!c.data.upcoming">
+
+  <div class="empty-icon">
+
+    <i class="fa fa-calendar-o"></i>
+
+  </div>
+
+
+  <h3>
+    No Upcoming Appointment
+  </h3>
+
+
+  <p>
+    You don't have any upcoming appointments.
+  </p>
+
+
+  <button
+    class="primary-btn"
+    ng-click="c.bookTest()"
+  >
+    Book a Test
+  </button>
+
+</div>
+
+  <!-- ================= RECENT REPORTS ================= -->
+
+  <div class="section-header">
+
+    <div>
+      <h2>Recent Reports</h2>
+      <p>Your latest diagnostic reports.</p>
+    </div>
+
+    <button class="link-btn" ng-click="c.goReports()">
+      View All <i class="fa fa-arrow-right"></i>
+    </button>
+
+  </div>
+
+
+  <div
+    class="reports-grid"
+    ng-if="c.data.recentReports.length > 0"
+  >
+
+    <div
+      class="report-card"
+      ng-repeat="report in c.data.recentReports"
+    >
+
+      <div class="report-icon">
+        <i class="fa fa-file-text-o"></i>
+      </div>
+
+      <div class="report-info">
+
+        <h3>{{report.test_name}}</h3>
+
+        <span>{{report.report_number}}</span>
+
+        <small>
+          <i class="fa fa-calendar"></i>
+          {{report.report_date_display}}
+        </small>
+
+      </div>
+
+      <span class="report-status">
+        {{report.status}}
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- No reports -->
+  <div
+    class="empty-card"
+    ng-if="c.data.recentReports.length === 0"
+  >
+
+    <div class="empty-icon">
+      <i class="fa fa-file-o"></i>
+    </div>
+
+    <h3>No Reports Available</h3>
+
+    <p>Your diagnostic reports will appear here after completion.</p>
+
+  </div>
+
+
+  <!-- ================= QUICK ACTIONS ================= -->
+
+  <div class="quick-actions">
+
+    <button ng-click="c.bookTest()">
+      <i class="fa fa-plus-circle"></i>
+      <span>Book New Test</span>
+    </button>
+
+    <button ng-click="c.goBookings()">
+      <i class="fa fa-calendar"></i>
+      <span>My Appointments</span>
+    </button>
+
+    <button ng-click="c.goReports()">
+      <i class="fa fa-file-text"></i>
+      <span>My Reports</span>
+    </button>
+
+  </div>
+
+</div>]]></template>
+    </sp_widget>
+</record_update>

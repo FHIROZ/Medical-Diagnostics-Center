@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_package_dependency_m2m">
+    <sys_package_dependency_m2m action="INSERT_OR_UPDATE">
+        <dependency display_value="System Diagnostics" source="com.glide.ui.diagnostics">c58a982cf54403100a22c0b3dfa15104</dependency>
+        <min_version>1.0.0</min_version>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-07 04:08:53</sys_created_on>
+        <sys_id>e59b4fa7c3038f50acfafd0ed40131fd</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-07 04:08:53</sys_updated_on>
+    </sys_package_dependency_m2m>
+</record_update>

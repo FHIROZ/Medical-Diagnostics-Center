@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element attributes="enforce_dot_walk_cross_scope_access=true" db_object_id="1403961e834f4f143b8da9e0deaad328" label="APPOINTMENT TABLE" max_length="40" name="x_2056616_medica_0_appointment_table" type="collection">
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Approval Status" max_length="40" name="approval_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Cancelled" sequence="3" value="cancelled"/>
+                <element inactive_on_update="false" label="Approved" sequence="1" value="approved"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+                <element inactive_on_update="false" label="Rejected" sequence="4" value="rejected"/>
+                <element inactive_on_update="false" label="Completed" sequence="2" value="completed"/>
+            </choice>
+        </element>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Status" max_length="40" name="status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Completed" sequence="2" value="completed"/>
+                <element inactive_on_update="false" label="Cancelled" sequence="4" value="cancelled"/>
+                <element inactive_on_update="false" label="InProgress" sequence="3" value="inprogress"/>
+                <element inactive_on_update="false" label="Confirmed" sequence="1" value="confirmed"/>
+                <element inactive_on_update="false" label="Scheduled" sequence="0" value="scheduled"/>
+            </choice>
+        </element>
+        <element label="Notes" max_length="40" name="notes" type="string"/>
+        <element label="Approval Date" max_length="40" name="approval_date" type="glide_date_time"/>
+        <element attributes="edge_encryption_enabled=true" choice="1" label="Payment Status" max_length="255" name="payment_status" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Failed" sequence="2" value="failed"/>
+                <element inactive_on_update="false" label="Refunded" sequence="3" value="refunded"/>
+                <element inactive_on_update="false" label="Paid" sequence="1" value="paid"/>
+                <element inactive_on_update="false" label="Pending" sequence="0" value="pending"/>
+            </choice>
+        </element>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Test" max_length="32" name="test" reference="x_2056616_medica_0_diagnostic_test" type="reference"/>
+        <element display="true" label="Appointment Number" max_length="40" name="appointment_number" type="string"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Email" max_length="32" name="email" reference="sys_email" type="reference"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Approved By" max_length="32" name="approved_by" reference="sys_user" type="reference"/>
+        <element label="Slot Time" max_length="40" name="slot_time" type="string"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Patient" max_length="32" name="patient" reference="x_2056616_medica_0_patient_table" type="reference"/>
+        <element attributes="edge_encryption_enabled=true,encode_utf8=false" label="Created By" max_length="32" name="created_by" reference="sys_user" type="reference"/>
+        <element label="Scheduled Date" max_length="255" name="scheduled_date" type="glide_date_time"/>
+        <element label="Rejection Reason" max_length="40" name="rejection_reason" type="string"/>
+        <element attributes="edge_encryption_enabled=true,omit_sys_original=true" label="Total Amount" max_length="20" name="total_amount" type="currency"/>
+        <element attributes="edge_encryption_enabled=true" label="Confirmation Sent" max_length="255" name="confirmation_sent" type="boolean"/>
+        <element attributes="edge_encryption_enabled=true,omit_sys_original=true" label="Refund Amount" max_length="20" name="refund_amount" type="currency"/>
+        <index name="index">
+            <element name="approved_by"/>
+        </index>
+        <index name="index2">
+            <element name="created_by"/>
+        </index>
+        <index name="index3">
+            <element name="email"/>
+        </index>
+        <index name="index4">
+            <element name="patient"/>
+        </index>
+        <index name="index5">
+            <element name="test"/>
+        </index>
+    </element>
+</database>
