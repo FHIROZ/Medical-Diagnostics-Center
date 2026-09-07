@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_documentation element="x_2056616_medica_0_new_field_1" label="New Field 1" language="en" table="diagnostics_test">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>x_2056616_medica_0_new_field_1</element>
+            <help/>
+            <hint/>
+            <label>New Field 1</label>
+            <language>en</language>
+            <name>diagnostics_test</name>
+            <plural/>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2026-09-03 10:14:43</sys_created_on>
+            <sys_id>3df8779a838b8f143b8da9e0deaad390</sys_id>
+            <sys_mod_count>3</sys_mod_count>
+            <sys_name>New Field 1</sys_name>
+            <sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Medical Diagnosis Center">6d529e9a834f4f143b8da9e0deaad30c</sys_scope>
+            <sys_update_name>sys_documentation_diagnostics_test_x_2056616_medica_0_new_field_1_en</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2026-09-03 10:14:46</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>

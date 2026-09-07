@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_app_application">
+    <sys_app_application action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <category display_value="Custom Applications">e0355b31ef303000a61d5a3615c0fb78</category>
+        <description/>
+        <device_type>browser</device_type>
+        <hint/>
+        <name>DIAGNOSTIC TEST</name>
+        <order>100</order>
+        <roles>x_2056616_medica_0.diagnostic_test_user</roles>
+        <sys_class_name>sys_app_application</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2026-09-03 09:27:05</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>c41eefd2834b8f143b8da9e0deaad380</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>DIAGNOSTIC TEST</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Medical Diagnosis Center" source="x_2056616_medica_0">6d529e9a834f4f143b8da9e0deaad30c</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Medical Diagnosis Center">6d529e9a834f4f143b8da9e0deaad30c</sys_scope>
+        <sys_update_name>sys_app_application_c41eefd2834b8f143b8da9e0deaad380</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2026-09-03 09:27:05</sys_updated_on>
+        <title>DIAGNOSTIC TEST</title>
+        <view_name/>
+    </sys_app_application>
+</record_update>
